@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Better OneTab",
+  "version": "2.0.0",
+  "description": "Store and restore your tabs in one click — a cleaner, faster OneTab alternative.",
+  "icons": {
+    "16": "icons/icon_16.png",
+    "48": "icons/icon_48.png",
+    "128": "icons/icon_128.png"
+  },
+  "background": {
+    "service_worker": "sw.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon_16.png",
+      "48": "icons/icon_48.png",
+      "128": "icons/icon_128.png"
+    }
+  },
+  "options_ui": {
+    "page": "app.html#/settings",
+    "open_in_tab": true
+  },
+  "commands": {
+    "store-selected-tabs": { "description": "Store selected tabs" },
+    "store-all-tabs": { "description": "Store all tabs in this window" },
+    "store-all-in-all-windows": { "description": "Store all tabs in all windows" },
+    "restore-latest-list": { "description": "Restore the most recent list" },
+    "open-lists": { "description": "Open the tab list page" }
+  },
+  "permissions": ["contextMenus", "storage", "tabs", "history", "alarms"],
+  "homepage_url": "https://github.com/bphirsh/better-onetab"
+}

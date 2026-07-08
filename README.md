@@ -1,77 +1,67 @@
-> [!NOTE]
->
-> The [OneTab](https://chromewebstore.google.com/detail/onetab/chphlpgkkbolifaimnlloiipkdnihall) extension seems to have been sold. The new owner has registered a trademark for it and notified me by email about the removal from Chrome Web Store.
->
-> I myself have not maintained this project for a long time. Therefore, this project is archived.
-> Currently, Chrome's built-in tab management features are powerful enough that there is no need to use extensions to manage tabs anymore. And you can try new browser projects like [Arc](https://arc.net/).
+# Better OneTab
 
+Store and restore your browser tabs in one click — a cleaner, faster OneTab alternative for
+Chrome and Brave.
 
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/36993664/44917039-f208ad80-ad3f-11e8-85e9-e29489f0ffb4.png">
-</p>
+This is a ground-up rewrite (v2) of [cnwangjie/better-onetab](https://github.com/cnwangjie/better-onetab):
+Svelte 5 + TypeScript + Vite, Manifest V3, no analytics, no error tracking, no third-party
+services except the optional GitHub Gist sync you control.
 
-<p align="center">
-<a href="https://circleci.com/gh/cnwangjie/better-onetab"><img src="https://img.shields.io/circleci/project/github/cnwangjie/better-onetab/master.svg?style=flat-square" alt="CircleCI"></a>
-<a href="https://chrome.google.com/webstore/detail/better-onetab/eookhngofldnbnidjlbkeecljkfpmfpg"><img src="https://img.shields.io/chrome-web-store/v/eookhngofldnbnidjlbkeecljkfpmfpg.svg?style=flat-square" alt="Chrome Web Store"></a>
-<a href="https://addons.mozilla.org/firefox/addon/better-onetab/"><img src="https://img.shields.io/amo/v/better-onetab.svg?style=flat-square" alt="Mozilla Add-ons"></a>
-<img src="https://img.shields.io/github/license/cnwangjie/better-onetab.svg?style=flat-square" alt="GitHub">
-<img src="https://img.shields.io/github/last-commit/cnwangjie/better-onetab.svg?style=flat-square" alt="GitHub last commit">
-<a href="https://gitter.im/better-onetab/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"><img src="https://img.shields.io/gitter/room/better-onetab/Lobby.svg?style=flat-square" alt="Join the chat at https://gitter.im/better-onetab/Lobby"></a>
-</p>
+## Features
 
-### A better onetab extension
+- **Store tabs** — all tabs, selected tabs, tabs to the left/right, or all windows, via the
+  toolbar popup, right-click menu, or keyboard shortcuts.
+- **Organize** — name lists, tag them, color them, pin them; drag tabs to reorder or move
+  between lists; drag lists to reorder.
+- **Search** across all stored tabs, filter by tag.
+- **Sync & backup via GitHub Gist** — your lists upload to a private gist you own shortly after
+  every change. The gist's revision history doubles as backup history.
+- **Mobile viewer** — a single static page that reads the gist so you can browse and open your
+  saved tabs from a phone.
+- **Import/export** as JSON (same format as sync).
+- Light/dark theme, follows the system by default.
 
-More beautiful and more feature.
+Existing data from v1 (the original Better OneTab) is migrated automatically on upgrade.
 
-### Features
+## Install (unpacked)
 
-[Send us a feature request.](https://github.com/cnwangjie/better-onetab/issues/new)
+```sh
+npm install
+npm run build
+```
 
- - [x] Basic feature of OneTab
- - [x] Popup page with simple list
- - [x] Pin tab list
- - [x] Keyboard shortcuts
- - [x] Options
- - [x] Drag and drop re-ordering
- - [x] Data & Options sync
- - [x] Import & Export
- - [x] Add stored tabs to history
- - [x] I18N support (only English & Chinese currently)
+Then in Brave/Chrome: `brave://extensions` → enable *Developer mode* → *Load unpacked* → select
+the `dist/` folder.
 
-More details in [changelog](CHANGELOG.md)
+## Sync setup
 
-### Next step
+1. Open the extension's **Settings → Sync & mobile**.
+2. [Create a GitHub token](https://github.com/settings/tokens/new?scopes=gist&description=Better+OneTab+Sync)
+   with only the `gist` scope.
+3. Paste it in and hit **Connect** — a private gist is created and your lists upload to it
+   automatically from then on.
 
-You can learn more about the next step of better onetab at [project page](https://github.com/cnwangjie/better-onetab/projects/1) and leave your comment in [issues page](https://github.com/cnwangjie/better-onetab/issues).
+## Mobile viewer
 
-### Installation
+`viewer/index.html` is a self-contained page — host it anywhere static (GitHub Pages, Netlify,
+or just open the file) and enter the same token + gist id once. It stores them in the browser's
+local storage and shows a read-only, phone-friendly view of your lists.
 
-Install from [Google Extension Store](https://chrome.google.com/webstore/detail/better-onetab/eookhngofldnbnidjlbkeecljkfpmfpg)
+## Development
 
-Install from [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/better-onetab/) (not optimized)
+```sh
+npm run dev     # rebuild on change
+npm run check   # typecheck (svelte-check)
+npm run build   # production build into dist/
+```
 
-Download the released .crx file in [releases page](https://github.com/cnwangjie/better-onetab/releases) and drag it to chrome extensions page.
+Architecture, in short: `src/sw.ts` is the MV3 service worker — it owns all list mutations
+(single writer, serialized queue) and the sync push (debounced via `chrome.alarms`). The popup
+and the list page are small Svelte apps that send mutation messages and react to
+`chrome.storage.onChanged`. Storage keys and list shape are kept compatible with v1.
+Sync backends implement the two-method `SyncProvider` interface (`src/core/sync/provider.ts`);
+GitHub Gist is the built-in one.
 
-Build your own from following steps：
+## License
 
-### Development
-
-0. Clone this repo
-0. Install dependencies (use `yarn` command)
-0. Auto reload (use `yarn dev` command)
-0. Click LOAD UNPACKED button and select ./dist path
-0. Build (use `yarn build` command)
-
-### Donation
-
-It took me a lot of time to develop Better Onetab and need to pay for the sync server every month. If my work helps you, you can donate it in the following way.
-
- - [PayPal](https://paypal.me/wangjie0)
-
-### Especially thanks
-
-Thanks for [@Yasujizr](https://github.com/Yasujizr) helped this project design new logo and banners.
-
-### License
-
-MIT LICENSE
+MIT — original extension © WangJie, v2 rewrite © Brian Hirsh.

@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light dark" />
+<title>Better OneTab — Viewer</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --surface: #fff; --surface-2: #eef0f3; --text: #1b1f24;
+    --text-2: #667080; --text-3: #98a1af; --border: #e3e6eb; --accent: #4c6ef5;
+    --danger: #e5484d;
+    --shadow: 0 1px 2px rgba(16,20,28,.05), 0 2px 8px rgba(16,20,28,.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101318; --surface: #191d24; --surface-2: #21262f; --text: #e7e9ec;
+      --text-2: #9aa3b0; --text-3: #6b7482; --border: #2a303a; --accent: #7c93ff;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 2px 8px rgba(0,0,0,.25);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 16px 14px 60px; }
+  header { display: flex; align-items: center; gap: 10px; padding: 4px 2px 14px; }
+  header h1 { font-size: 17px; margin: 0; flex: 1; }
+  .icon-btn {
+    border: none; background: var(--surface-2); color: var(--text-2); font: inherit;
+    padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500;
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    box-shadow: var(--shadow); padding: 14px; margin-bottom: 12px;
+  }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; }
+  input[type=password], input[type=text], input[type=search] {
+    width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--bg); color: var(--text); font: inherit; outline: none;
+  }
+  input:focus { border-color: var(--accent); }
+  .primary {
+    margin-top: 14px; width: 100%; padding: 11px; border: none; border-radius: 8px;
+    background: var(--accent); color: #fff; font: inherit; font-weight: 600; cursor: pointer;
+  }
+  .muted { color: var(--text-2); font-size: 13px; }
+  .error { color: var(--danger); font-size: 13.5px; margin-top: 10px; }
+  .search-row { margin-bottom: 12px; }
+  .list-card { padding: 4px 6px; }
+  .list-head {
+    display: flex; align-items: center; gap: 8px; padding: 9px 8px; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .accent { width: 4px; height: 22px; border-radius: 2px; flex-shrink: 0; }
+  .list-title { font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .list-title.untitled { color: var(--text-3); font-weight: 500; }
+  .list-meta { font-size: 12px; color: var(--text-3); white-space: nowrap; }
+  .chev { color: var(--text-3); transition: transform .15s; font-size: 12px; }
+  .open .chev { transform: rotate(90deg); }
+  .tabs { display: none; padding: 0 4px 8px; }
+  .open .tabs { display: block; }
+  .tab {
+    display: flex; align-items: center; gap: 10px; padding: 9px 8px; border-radius: 8px;
+    color: var(--text); text-decoration: none; min-width: 0;
+  }
+  .tab:active { background: var(--surface-2); }
+  .fav {
+    width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0;
+    background: var(--surface-2); display: inline-flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: var(--text-3);
+  }
+  .fav img { width: 18px; height: 18px; border-radius: 4px; }
+  .tab-text { min-width: 0; flex: 1; }
+  .tab-title { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tab-url { display: block; font-size: 12px; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tag {
+    display: inline-block; padding: 1px 8px; border-radius: 99px; background: var(--surface-2);
+    color: var(--text-2); font-size: 11.5px; margin: 0 4px 6px 0;
+  }
+  .tags-row { padding: 0 8px 4px 20px; }
+  .status { text-align: center; color: var(--text-3); padding: 30px 0; font-size: 14px; }
+  footer { text-align: center; padding-top: 20px; }
+  footer button { background: none; border: none; color: var(--text-3); font-size: 12.5px; cursor: pointer; text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Better OneTab</h1>
+    <button class="icon-btn" id="refreshBtn" hidden>Refresh</button>
+  </header>
+
+  <div class="card" id="setup" hidden>
+    <p class="muted" style="margin-top:0">
+      Read-only viewer for your synced tab lists. Enter the same GitHub token and gist id used by
+      the extension (Settings → Sync &amp; mobile). They are stored only on this device.
+    </p>
+    <label for="token">GitHub token</label>
+    <input type="password" id="token" placeholder="ghp_… or github_pat_…" autocomplete="off" />
+    <label for="gist">Gist id</label>
+    <input type="text" id="gist" placeholder="e.g. 4f13c2b0a1…" autocomplete="off" />
+    <button class="primary" id="saveBtn">Show my tabs</button>
+    <div class="error" id="setupError" hidden></div>
+  </div>
+
+  <div id="viewer" hidden>
+    <div class="search-row">
+      <input type="search" id="search" placeholder="Search tabs…" />
+    </div>
+    <div id="lists"></div>
+    <div class="status" id="status" hidden></div>
+    <footer>
+      <span class="muted" id="updatedAt"></span><br />
+      <button id="resetBtn">Change token / gist</button>
+    </footer>
+  </div>
+</div>
+
+<script>
+(() => {
+  const FILE = 'better-onetab.json'
+  const $ = id => document.getElementById(id)
+  const store = {
+    get token() { return localStorage.getItem('bot-token') || '' },
+    get gist() { return localStorage.getItem('bot-gist') || '' },
+    set({ token, gist }) {
+      localStorage.setItem('bot-token', token)
+      localStorage.setItem('bot-gist', gist)
+    },
+    clear() { localStorage.removeItem('bot-token'); localStorage.removeItem('bot-gist') },
+  }
+
+  let lists = []
+
+  const timeAgo = ts => {
+    const m = Math.floor((Date.now() - ts) / 60000)
+    if (m < 1) return 'just now'
+    if (m < 60) return m + ' min ago'
+    const h = Math.floor(m / 60)
+    if (h < 24) return h + ' h ago'
+    const d = Math.floor(h / 24)
+    if (d === 1) return 'yesterday'
+    if (d < 30) return d + ' days ago'
+    return new Date(ts).toLocaleDateString()
+  }
+
+  const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
+
+  const COLORS = { red:'#e5695e', pink:'#dd66a2', purple:'#9a6ee8', indigo:'#6a79e8', blue:'#4d9ee6',
+    cyan:'#3fb9cf', teal:'#3cb8a4', green:'#58b968', yellow:'#d9a514', orange:'#e08c3c', brown:'#a07855' }
+
+  const domain = url => { try { return new URL(url).hostname } catch { return '' } }
+
+  const render = () => {
+    const q = $('search').value.trim().toLowerCase()
+    const container = $('lists')
+    container.innerHTML = ''
+    let shown = 0
+    for (const list of lists) {
+      const tabs = q
+        ? list.tabs.filter(t => (t.title || '').toLowerCase().includes(q) || t.url.toLowerCase().includes(q))
+        : list.tabs
+      if (q && tabs.length === 0) continue
+      shown++
+      const card = document.createElement('div')
+      card.className = 'card list-card' + (q || list.expand !== false ? ' open' : '')
+      const color = COLORS[list.color] || 'transparent'
+      const title = list.title ? esc(list.title) : 'Untitled'
+      card.innerHTML =
+        '<div class="list-head">' +
+        '<span class="accent" style="background:' + color + '"></span>' +
+        '<span class="list-title' + (list.title ? '' : ' untitled') + '">' + title + '</span>' +
+        '<span class="list-meta">' + tabs.length + ' tabs · ' + timeAgo(list.time) + '</span>' +
+        '<span class="chev">▶</span></div>' +
+        (list.tags && list.tags.length
+          ? '<div class="tags-row">' + list.tags.map(t => '<span class="tag">' + esc(t) + '</span>').join('') + '</div>'
+          : '') +
+        '<div class="tabs">' + tabs.map(t => {
+          const d = domain(t.url)
+          const letter = esc((t.title || d || '?').charAt(0).toUpperCase())
+          const fav = t.favIconUrl && t.favIconUrl.startsWith('http')
+            ? '<span class="fav"><img src="' + esc(t.favIconUrl) + '" alt="" loading="lazy" onerror="this.parentNode.textContent=\'' + letter + '\'"></span>'
+            : '<span class="fav">' + letter + '</span>'
+          return '<a class="tab" href="' + esc(t.url) + '" target="_blank" rel="noreferrer">' + fav +
+            '<span class="tab-text"><span class="tab-title">' + esc(t.title || t.url) + '</span>' +
+            '<span class="tab-url">' + esc(d || t.url) + '</span></span></a>'
+        }).join('') + '</div>'
+      card.querySelector('.list-head').addEventListener('click', () => card.classList.toggle('open'))
+      container.appendChild(card)
+    }
+    $('status').hidden = shown > 0
+    $('status').textContent = q ? 'No matches.' : 'No stored tabs yet.'
+  }
+
+  const load = async () => {
+    $('status').hidden = false
+    $('status').textContent = 'Loading…'
+    $('lists').innerHTML = ''
+    try {
+      const res = await fetch('https://api.github.com/gists/' + encodeURIComponent(store.gist), {
+        headers: { Authorization: 'Bearer ' + store.token, Accept: 'application/vnd.github+json' },
+      })
+      if (!res.ok) throw new Error(res.status === 401 ? 'Token rejected' : res.status === 404 ? 'Gist not found' : 'GitHub error ' + res.status)
+      const gist = await res.json()
+      const file = gist.files && gist.files[FILE]
+      if (!file) throw new Error('No sync data in this gist')
+      let content = file.content
+      if (file.truncated) {
+        const raw = await fetch(file.raw_url)
+        if (!raw.ok) throw new Error('Could not fetch full content')
+        content = await raw.text()
+      }
+      const snapshot = JSON.parse(content)
+      lists = Array.isArray(snapshot) ? snapshot : snapshot.lists || []
+      $('updatedAt').textContent = 'Synced copy from ' + new Date(gist.updated_at).toLocaleString()
+      render()
+    } catch (e) {
+      $('status').hidden = false
+      $('status').textContent = e.message
+    }
+  }
+
+  const show = view => {
+    $('setup').hidden = view !== 'setup'
+    $('viewer').hidden = view !== 'viewer'
+    $('refreshBtn').hidden = view !== 'viewer'
+  }
+
+  $('saveBtn').addEventListener('click', () => {
+    const token = $('token').value.trim()
+    const gist = $('gist').value.trim().replace(/^https:\/\/gist\.github\.com\/(?:[^/]+\/)?/, '')
+    if (!token || !gist) {
+      $('setupError').hidden = false
+      $('setupError').textContent = 'Both fields are required.'
+      return
+    }
+    store.set({ token, gist })
+    show('viewer')
+    load()
+  })
+  $('resetBtn').addEventListener('click', () => { store.clear(); show('setup') })
+  $('refreshBtn').addEventListener('click', load)
+  $('search').addEventListener('input', render)
+
+  if (store.token && store.gist) { show('viewer'); load() } else { show('setup') }
+})()
+</script>
+</body>
+</html>
