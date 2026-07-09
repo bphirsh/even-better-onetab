@@ -150,16 +150,16 @@
       </label>
       <div class="row">
         <div class="text">
-          <div class="label">Opening a list puts its tabs</div>
+          <div class="label">Open tabs in</div>
         </div>
         <select
           class="select"
           value={app.opts.restorePosition}
           onchange={e => update('restorePosition', e.currentTarget.value as Options['restorePosition'])}
         >
-          <option value="end">At the end of the current window</option>
-          <option value="start">At the start of the current window</option>
-          <option value="new-window">In a new window</option>
+          <option value="end">The end of the current window</option>
+          <option value="start">The start of the current window</option>
+          <option value="new-window">A new window</option>
         </select>
       </div>
       <label class="row">
