@@ -11,4 +11,5 @@ export const timeAgo = (ts: number): string => {
   return new Date(ts).toLocaleDateString()
 }
 
-export const fullTime = (ts: number): string => new Date(ts).toLocaleString()
+export const fullTime = (ts: number): string =>
+  new Date(ts).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })

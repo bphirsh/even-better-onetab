@@ -130,19 +130,11 @@
             on your phone and paste your token and gist id once — your lists are readable anywhere.
           </div>
         </div>
-        <span class="phone-icon"><Icon name="phone" size={18} /></span>
-      </div>
-
-      <div class="row">
-        <div class="text">
-          <div class="label">Viewer credentials</div>
-          <div class="desc">Copy these to enter into the viewer on your phone.</div>
-        </div>
         <div class="btn-group">
-          <button class="btn" onclick={() => copy('Token', app.syncConfig.gistToken)}>
+          <button class="btn" title="Copy the GitHub token" onclick={() => copy('Token', app.syncConfig.gistToken)}>
             <Icon name="copy" size={13} /> Token
           </button>
-          <button class="btn" onclick={() => copy('Gist id', app.syncConfig.gistId)}>
+          <button class="btn" title="Copy the gist id" onclick={() => copy('Gist id', app.syncConfig.gistId)}>
             <Icon name="copy" size={13} /> Gist id
           </button>
         </div>
@@ -236,11 +228,6 @@
   .btn-group {
     display: flex;
     gap: 8px;
-    flex-shrink: 0;
-  }
-
-  .phone-icon {
-    color: var(--text-3);
     flex-shrink: 0;
   }
 
