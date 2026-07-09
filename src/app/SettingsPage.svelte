@@ -245,7 +245,9 @@
 
   <p class="support">
     Made with ❤️ in NYC<br />
-    <a href="https://github.com/sponsors/bphirsh" target="_blank" rel="noreferrer">☕ Buy me a coffee.</a>
+    <a class="btn primary coffee" href="https://github.com/sponsors/bphirsh" target="_blank" rel="noreferrer">
+      ☕ Buy me a coffee
+    </a>
   </p>
 </div>
 
@@ -321,6 +323,15 @@
     font-size: 12.5px;
     color: var(--text-3);
     margin: 4px 0 0;
+  }
+
+  .coffee {
+    margin-top: 10px;
+    font-size: 13px;
+  }
+
+  .coffee:hover {
+    text-decoration: none;
   }
 
   code {
