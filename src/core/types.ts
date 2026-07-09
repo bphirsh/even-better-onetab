@@ -33,7 +33,7 @@ export interface TabList {
 
 /** The JSON document used for manual export/import and for Gist sync. */
 export interface Snapshot {
-  format: 'better-onetab/2'
+  format: 'even-better-onetab/1'
   exportedAt: number
   lists: TabList[]
   tombstones?: Tombstone[]

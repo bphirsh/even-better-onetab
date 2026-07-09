@@ -3,31 +3,37 @@
 Store and restore your browser tabs in one click — a cleaner, faster OneTab alternative for
 Chrome and Brave.
 
-This is a ground-up rewrite (v2) of [cnwangjie/better-onetab](https://github.com/cnwangjie/better-onetab):
-Svelte 5 + TypeScript + Vite, Manifest V3, no analytics, no error tracking, no third-party
-services except the optional GitHub Gist sync you control.
+This is a fork of [cnwangjie/better-onetab](https://github.com/cnwangjie/better-onetab)
+(unmaintained since ~2020), rebuilt from the ground up and modernized. The original was
+Vue 2 + Vuetify 1 + Webpack 4 on Manifest V2, which Chrome and Brave no longer support;
+this rewrite is Svelte 5 + TypeScript + Vite on Manifest V3.
 
-## Features
+## What changed from the original
 
-- **Store tabs** — all tabs, selected tabs, tabs to the left/right, or all windows, via the
-  toolbar popup, right-click menu, or keyboard shortcuts. The toolbar button itself is
-  configurable (popup, store selected, store all, or open the list page).
+- **Manifest V3** — the persistent background page became a service worker, so the extension
+  keeps working as browsers drop MV2.
+- **Redesigned UI** — the 2018-era Material design was replaced with a cleaner card-based list
+  page, refreshed color palette, and a proper light/dark theme that follows your system.
+- **No tracking, no third parties** — Google Analytics, Sentry error reporting, and the
+  original author's private sync server (long dead) are all removed, along with the Gitter and
+  issue-tracker links. The only external service is the optional GitHub Gist sync **you** own.
+- **New sync** — lists upload to a private gist shortly after every change and merge back on
+  browser startup: newer edits win per list, and deletions propagate (tombstones) instead of
+  resurrecting. The gist's revision history doubles as backup history.
+- **Mobile access** — a static viewer page reads the gist so you can browse and open your saved
+  tabs from a phone (extensions don't run on mobile browsers).
 - **Tab groups survive** — stored tabs remember their tab group (name + color) and are
   re-grouped on restore.
-- **Organize** — name lists, tag them, color them, pin them; drag tabs to reorder or move
-  between lists; drag lists to reorder. Deleting is safe: every destructive action gets an
-  Undo toast.
-- **Search** across all stored tabs, filter by tag.
+- **Undo** — deleting a list or restore-and-remove shows an Undo toast; misclicks aren't fatal.
 - **Copy as Markdown** — turn any list into `- [title](url)` lines for pasting into notes.
-- **Sync & backup via GitHub Gist** — your lists upload to a private gist you own shortly after
-  every change, and merge back on browser startup (newer edits win, deletions propagate), so
-  two desktops converge. The gist's revision history doubles as backup history.
-- **Mobile viewer** — a single static page that reads the gist so you can browse and open your
-  saved tabs from a phone.
-- **Import/export** as JSON (same format as sync).
-- Light/dark theme, follows the system by default.
+- **Configurable toolbar button** — clicking the extension icon can open the popup, store
+  selected tabs, store all tabs, or open the list page.
+- **~10× smaller** — the whole extension is ~120 KB of JS versus >1 MB for the original build.
 
-Existing data from v1 (the original Better OneTab) is migrated automatically on upgrade.
+Everything else you'd expect carried over: store all/selected/left/right tabs via popup,
+context menu, or keyboard shortcuts; named, tagged, colored, pinned lists; drag-and-drop for
+tabs and lists; search; JSON import/export. Data from an existing v1 install migrates
+automatically on upgrade.
 
 ## Install (unpacked)
 
@@ -64,10 +70,10 @@ npm run build   # production build into dist/
 Architecture, in short: `src/sw.ts` is the MV3 service worker — it owns all list mutations
 (single writer, serialized queue) and the sync push (debounced via `chrome.alarms`). The popup
 and the list page are small Svelte apps that send mutation messages and react to
-`chrome.storage.onChanged`. Storage keys and list shape are kept compatible with v1.
-Sync backends implement the two-method `SyncProvider` interface (`src/core/sync/provider.ts`);
-GitHub Gist is the built-in one.
+`chrome.storage.onChanged`. Sync backends implement the two-method `SyncProvider` interface
+(`src/core/sync/provider.ts`); GitHub Gist is the built-in one, and the merge logic lives in
+`src/core/sync/merge.ts`.
 
 ## License
 
-MIT — original extension © WangJie, v2 rewrite © Brian Hirsh.
+MIT — original extension © WangJie, this rewrite © Brian Hirsh.

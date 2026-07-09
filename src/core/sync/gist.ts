@@ -2,7 +2,7 @@ import type { Snapshot } from '../types'
 import type { SyncProvider } from './provider'
 
 const API = 'https://api.github.com'
-export const GIST_FILENAME = 'better-onetab.json'
+export const GIST_FILENAME = 'even-better-onetab.json'
 const GIST_DESCRIPTION = 'Even Better OneTab — synced tab lists'
 
 const headers = (token: string) => ({

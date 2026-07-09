@@ -44,7 +44,7 @@ export const validateList = (list: unknown): list is Partial<TabList> & { tabs: 
 export const normalizeList = (list: Partial<TabList>): TabList => createNewTabList(list)
 
 export const createSnapshot = (lists: TabList[], tombstones: Tombstone[] = []): Snapshot => ({
-  format: 'better-onetab/2',
+  format: 'even-better-onetab/1',
   exportedAt: Date.now(),
   lists: lists.map(normalizeList),
   tombstones,

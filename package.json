@@ -1,10 +1,10 @@
 {
-  "name": "better-onetab",
+  "name": "even-better-onetab",
   "version": "2.0.0",
   "description": "Store and restore your tabs in one click — a cleaner, faster OneTab alternative.",
   "private": true,
   "type": "module",
-  "repository": "https://github.com/bphirsh/better-onetab",
+  "repository": "https://github.com/bphirsh/even-better-onetab",
   "license": "MIT",
   "scripts": {
     "dev": "vite build --watch --mode development",

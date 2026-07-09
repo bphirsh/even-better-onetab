@@ -122,7 +122,7 @@
           <div class="desc">
             Open the viewer page on your phone, paste the same token and gist id
             (<code>{app.syncConfig.gistId}</code>), and your lists are readable anywhere. See the
-            <a href="https://github.com/bphirsh/better-onetab#mobile-viewer" target="_blank" rel="noreferrer">setup guide</a>.
+            <a href="https://github.com/bphirsh/even-better-onetab#mobile-viewer" target="_blank" rel="noreferrer">setup guide</a>.
           </div>
         </div>
         <span class="phone-icon"><Icon name="phone" size={18} /></span>
