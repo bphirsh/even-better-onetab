@@ -28,7 +28,14 @@ export interface TabList {
   pinned: boolean
   expand: boolean
   color: string
+  archived: boolean
   updatedAt: number
+}
+
+/** A deleted list kept locally for a while so it can be recovered from History. */
+export interface TrashEntry {
+  list: TabList
+  deletedAt: number
 }
 
 /** The JSON document used for manual export/import and for Gist sync. */

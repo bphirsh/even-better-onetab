@@ -13,6 +13,7 @@
   }
 
   const matches = (list: TabList) => {
+    if (list.archived) return false
     if (filters.tag && !list.tags.includes(filters.tag)) return false
     const q = filters.query.trim().toLowerCase()
     if (!q) return true
@@ -55,7 +56,7 @@
     <div class="empty">
       <Icon name="layers" size={40} />
       <h2>No stored tabs yet</h2>
-      <p>Click “Store all tabs” or use the toolbar button to save your open tabs here.</p>
+      <p>Store tabs with the extension button, the page’s right-click menu, or a keyboard shortcut — they’ll show up here.</p>
     </div>
   {:else if app.loaded && dndItems.length === 0}
     <div class="empty">
@@ -89,6 +90,10 @@
     flex-direction: column;
     gap: 12px;
     outline: none;
+  }
+
+  :global(.comfortable) .lists {
+    gap: 18px;
   }
 
   .list-wrap {

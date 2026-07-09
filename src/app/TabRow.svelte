@@ -90,6 +90,11 @@
     background: var(--surface-hover);
   }
 
+  :global(.comfortable) .row {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
   :global([data-theme='dark']) .row:hover {
     background: var(--surface-2);
   }

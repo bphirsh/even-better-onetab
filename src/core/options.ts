@@ -3,6 +3,8 @@ export type BrowserAction = (typeof BROWSER_ACTIONS)[number]
 
 export interface Options {
   theme: 'auto' | 'light' | 'dark'
+  /** Spacing scale for the list page. */
+  density: 'compact' | 'comfortable'
   /** What clicking the toolbar button does. Anything but 'popup' clears the popup so the click reaches the service worker. */
   browserAction: BrowserAction
   /** What clicking a stored tab in the list page does. */
@@ -19,20 +21,21 @@ export interface Options {
   pageContext: boolean
   /** Show context menu on all elements (links, images, ...) not just the page. */
   allContext: boolean
-  /** Ask for confirmation before deleting a list. */
+  /** Ask for confirmation before deleting a list (off by default — deletion has Undo and History). */
   alertRemoveList: boolean
   /** Skip about:/chrome:/file: etc. URLs when storing. */
   excludeIllegalURL: boolean
   /** Deduplicate tabs by URL within each list when saving. */
   removeDuplicate: boolean
-  /** Restore tabs at the end of the window instead of the start. */
-  openEnd: boolean
+  /** Where restored tabs open. */
+  restorePosition: 'end' | 'start' | 'new-window'
   /** Open the list page after storing all tabs (so the window isn't left empty). */
   openTabListNoTab: boolean
 }
 
 export const DEFAULT_OPTIONS: Options = {
   theme: 'auto',
+  density: 'compact',
   browserAction: 'popup',
   itemClickAction: 'open-and-remove',
   itemDisplay: 'title-and-url',
@@ -42,9 +45,9 @@ export const DEFAULT_OPTIONS: Options = {
   pinNewList: false,
   pageContext: true,
   allContext: false,
-  alertRemoveList: true,
+  alertRemoveList: false,
   excludeIllegalURL: true,
   removeDuplicate: false,
-  openEnd: true,
+  restorePosition: 'end',
   openTabListNoTab: true,
 }

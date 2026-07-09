@@ -10,6 +10,7 @@ export type Message =
   | { type: 'lists-reorder'; id: string; toIndex: number }
   | { type: 'lists-replace'; lists: TabList[] }
   | { type: 'restore-list'; id: string; newWindow?: boolean; remove?: boolean }
+  | { type: 'trash-restore'; id: string }
   | { type: 'open-lists' }
   | { type: 'sync-setup'; token: string }
   | { type: 'sync-push' }

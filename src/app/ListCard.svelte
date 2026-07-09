@@ -120,6 +120,17 @@
     if (ok) toast('List deleted', 'info', undoAction(captured))
   }
 
+  const archiveList = async () => {
+    menuOpen = false
+    const { ok } = await act({ type: 'list-update', id: list._id, patch: { archived: true } })
+    if (ok) {
+      toast('List archived', 'info', {
+        label: 'Undo',
+        fn: () => act({ type: 'list-update', id: list._id, patch: { archived: false } }),
+      })
+    }
+  }
+
   const copyMarkdown = async () => {
     menuOpen = false
     const escapeTitle = (s: string) => s.replace(/[\[\]]/g, m => '\\' + m)
@@ -182,7 +193,7 @@
       />
     {:else}
       <button class="title" class:untitled={!list.title} onclick={startTitleEdit} title="Click to rename">
-        {list.title || 'Untitled'}
+        <span class="title-text">{list.title || 'Untitled'}</span>
       </button>
     {/if}
 
@@ -193,9 +204,7 @@
     <span class="meta">{list.tabs.length} tab{list.tabs.length === 1 ? '' : 's'} · {timeAgo(list.time)}</span>
 
     <div class="actions">
-      <button class="icon-btn" title="Restore all tabs" onclick={() => restore()}>
-        <Icon name="restore" size={15} />
-      </button>
+      <button class="open-btn" title="Open all tabs in this list" onclick={() => restore()}>Open</button>
       <div class="dropdown" bind:this={menuEl}>
         <button class="icon-btn" title="More" onclick={() => (menuOpen = !menuOpen)}>
           <Icon name="more" size={15} />
@@ -203,15 +212,18 @@
         {#if menuOpen}
           <div class="menu">
             <button class="menu-item" onclick={() => restore(true)}>
-              <Icon name="external" size={14} /> Restore in new window
+              <Icon name="external" size={14} /> Open in new window
             </button>
             <button class="menu-item" onclick={() => restore(false, true)}>
-              <Icon name="restore" size={14} /> Restore &amp; remove
+              <Icon name="restore" size={14} /> Open &amp; remove
             </button>
             <div class="menu-sep"></div>
             <button class="menu-item" onclick={togglePin}>
               <Icon name="pin" size={14} />
               {list.pinned ? 'Unpin' : 'Pin'}
+            </button>
+            <button class="menu-item" onclick={archiveList}>
+              <Icon name="archive" size={14} /> Archive
             </button>
             <button class="menu-item" onclick={startTagsEdit}>
               <Icon name="tag" size={14} /> Edit tags
@@ -328,18 +340,38 @@
     padding: 4px 6px;
     border-radius: 6px;
     overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 40%;
+  }
+
+  .title-text {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .title:hover {
     background: var(--surface-2);
   }
 
+  /* untitled: collapsed to nothing so the meta sits where a name would be;
+     hovering the card slides a ghost "Untitled" in smoothly */
   .title.untitled {
     color: var(--text-3);
     font-weight: 500;
+    max-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    opacity: 0;
+    transition: max-width 0.22s ease, opacity 0.18s ease, padding 0.22s ease;
+  }
+
+  .card:hover .title.untitled,
+  .title.untitled:focus-visible {
+    max-width: 90px;
+    padding-left: 6px;
+    padding-right: 6px;
+    opacity: 1;
   }
 
   .title-input {
@@ -376,6 +408,27 @@
   .card:hover .actions,
   .dropdown:has(.menu) {
     opacity: 1;
+  }
+
+  .open-btn {
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .open-btn:hover {
+    background: var(--accent-soft);
+  }
+
+  /* comfortable density */
+  :global(.comfortable) .card {
+    padding: 10px 14px 12px;
+  }
+
+  :global(.comfortable) header {
+    min-height: 42px;
   }
 
   .dropdown {

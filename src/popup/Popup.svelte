@@ -10,7 +10,7 @@
     if (app.loaded) applyTheme(app.opts.theme)
   })
 
-  const recent = $derived(app.lists.slice(0, 6))
+  const recent = $derived(app.lists.filter(l => !l.archived).slice(0, 6))
 
   const store = async (which: 'all' | 'selected') => {
     await send({ type: 'store-tabs', which })

@@ -14,15 +14,13 @@
     desc?: string
   }
 
-  const behaviorToggles: ToggleDef[] = [
+  const storingToggles: ToggleDef[] = [
     { key: 'ignorePinned', label: 'Skip pinned tabs', desc: 'Pinned browser tabs are left open when storing.' },
-    { key: 'addHistory', label: 'Keep stored tabs in history', desc: 'Stored tabs stay findable from the address bar.' },
+    { key: 'excludeIllegalURL', label: 'Skip browser-internal pages', desc: 'about:, chrome:, file: and similar URLs are not stored.' },
+    { key: 'removeDuplicate', label: 'Remove duplicate tabs within a list' },
+    { key: 'addHistory', label: 'Keep stored tabs in browser history', desc: 'Stored tabs stay findable from the address bar.' },
     { key: 'pinNewList', label: 'Pin new lists' },
     { key: 'openTabListNoTab', label: 'Open the list page after storing all tabs', desc: 'So the window isn’t left empty.' },
-    { key: 'openEnd', label: 'Restore tabs at the end of the window' },
-    { key: 'removeDuplicate', label: 'Remove duplicate tabs within a list' },
-    { key: 'excludeIllegalURL', label: 'Skip browser-internal pages', desc: 'about:, chrome:, file: and similar URLs are not stored.' },
-    { key: 'alertRemoveList', label: 'Confirm before deleting a list' },
   ]
 
   const menuToggles: ToggleDef[] = [
@@ -45,6 +43,15 @@
           <option value="auto">System</option>
           <option value="light">Light</option>
           <option value="dark">Dark</option>
+        </select>
+      </div>
+      <div class="row">
+        <div class="text">
+          <div class="label">Density</div>
+        </div>
+        <select class="select" value={app.opts.density} onchange={e => update('density', e.currentTarget.value as Options['density'])}>
+          <option value="compact">Compact</option>
+          <option value="comfortable">Comfortable</option>
         </select>
       </div>
       <div class="row">
@@ -72,7 +79,73 @@
   </section>
 
   <section>
-    <h2>Behavior</h2>
+    <h2>Storing tabs</h2>
+    <div class="card">
+      {#each storingToggles as t (t.key)}
+        <label class="row">
+          <div class="text">
+            <div class="label">{t.label}</div>
+            {#if t.desc}<div class="desc">{t.desc}</div>{/if}
+          </div>
+          <input
+            type="checkbox"
+            class="switch"
+            checked={app.opts[t.key] as boolean}
+            onchange={e => update(t.key, e.currentTarget.checked as never)}
+          />
+        </label>
+      {/each}
+    </div>
+  </section>
+
+  <section>
+    <h2>Opening tabs</h2>
+    <div class="card">
+      <div class="row">
+        <div class="text">
+          <div class="label">Clicking a stored tab</div>
+        </div>
+        <select
+          class="select"
+          value={app.opts.itemClickAction}
+          onchange={e => update('itemClickAction', e.currentTarget.value as Options['itemClickAction'])}
+        >
+          <option value="open-and-remove">Opens it and removes it from the list</option>
+          <option value="open">Opens it and keeps it in the list</option>
+          <option value="none">Does nothing</option>
+        </select>
+      </div>
+      <div class="row">
+        <div class="text">
+          <div class="label">Opening a list puts its tabs</div>
+        </div>
+        <select
+          class="select"
+          value={app.opts.restorePosition}
+          onchange={e => update('restorePosition', e.currentTarget.value as Options['restorePosition'])}
+        >
+          <option value="end">At the end of the current window</option>
+          <option value="start">At the start of the current window</option>
+          <option value="new-window">In a new window</option>
+        </select>
+      </div>
+      <label class="row">
+        <div class="text">
+          <div class="label">Confirm before deleting a list</div>
+          <div class="desc">Off by default — deletions have Undo and stay recoverable in History for 30 days.</div>
+        </div>
+        <input
+          type="checkbox"
+          class="switch"
+          checked={app.opts.alertRemoveList}
+          onchange={e => update('alertRemoveList', e.currentTarget.checked)}
+        />
+      </label>
+    </div>
+  </section>
+
+  <section>
+    <h2>Toolbar &amp; menus</h2>
     <div class="card">
       <div class="row">
         <div class="text">
@@ -96,40 +169,6 @@
           <option value="show-list">Opens the list page</option>
         </select>
       </div>
-      <div class="row">
-        <div class="text">
-          <div class="label">Clicking a stored tab</div>
-        </div>
-        <select
-          class="select"
-          value={app.opts.itemClickAction}
-          onchange={e => update('itemClickAction', e.currentTarget.value as Options['itemClickAction'])}
-        >
-          <option value="open-and-remove">Opens it and removes it from the list</option>
-          <option value="open">Opens it and keeps it in the list</option>
-          <option value="none">Does nothing</option>
-        </select>
-      </div>
-      {#each behaviorToggles as t (t.key)}
-        <label class="row">
-          <div class="text">
-            <div class="label">{t.label}</div>
-            {#if t.desc}<div class="desc">{t.desc}</div>{/if}
-          </div>
-          <input
-            type="checkbox"
-            class="switch"
-            checked={app.opts[t.key] as boolean}
-            onchange={e => update(t.key, e.currentTarget.checked as never)}
-          />
-        </label>
-      {/each}
-    </div>
-  </section>
-
-  <section>
-    <h2>Context menu</h2>
-    <div class="card">
       {#each menuToggles as t (t.key)}
         <label class="row">
           <div class="text">

@@ -34,6 +34,7 @@ export const createNewTabList = (partial: Partial<TabList> = {}): TabList => ({
   pinned: partial.pinned === true,
   expand: partial.expand !== false,
   color: partial.color || '',
+  archived: partial.archived === true,
   updatedAt: partial.updatedAt || partial.time || Date.now(),
 })
 

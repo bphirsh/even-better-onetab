@@ -1,6 +1,6 @@
 import { normalizeList, validateList } from './lists'
 import { DEFAULT_OPTIONS, type Options } from './options'
-import type { SyncConfig, SyncState, TabList, Tombstone } from './types'
+import type { SyncConfig, SyncState, TabList, Tombstone, TrashEntry } from './types'
 
 // Storage keys are kept identical to v1 so existing user data survives the upgrade.
 const LISTS_KEY = 'lists'
@@ -8,8 +8,11 @@ const OPTS_KEY = 'opts'
 const SYNC_CONFIG_KEY = 'syncConfig'
 const SYNC_STATE_KEY = 'syncState'
 const TOMBSTONES_KEY = 'syncTombstones'
+const TRASH_KEY = 'trash'
 
 const TOMBSTONE_TTL = 30 * 86_400_000
+const TRASH_TTL = 30 * 86_400_000
+const TRASH_MAX_ENTRIES = 50
 
 export const getLists = async (): Promise<TabList[]> => {
   const { [LISTS_KEY]: lists } = await chrome.storage.local.get(LISTS_KEY)
@@ -79,4 +82,28 @@ export const addTombstones = async (ids: string[]) => {
   await setTombstones([...kept, ...ids.map(id => ({ id, deletedAt: now }))])
 }
 
-export const STORAGE_KEYS = { LISTS_KEY, OPTS_KEY, SYNC_CONFIG_KEY, SYNC_STATE_KEY, TOMBSTONES_KEY }
+/** Drops tombstones for ids that exist again (e.g. undo / restore from History). */
+export const removeTombstones = async (ids: string[]) => {
+  if (ids.length === 0) return
+  const kept = (await getTombstones()).filter(t => !ids.includes(t.id))
+  await setTombstones(kept)
+}
+
+export const getTrash = async (): Promise<TrashEntry[]> => {
+  const { [TRASH_KEY]: trash } = await chrome.storage.local.get(TRASH_KEY)
+  const now = Date.now()
+  return Array.isArray(trash) ? trash.filter(t => now - t.deletedAt < TRASH_TTL) : []
+}
+
+export const setTrash = async (trash: TrashEntry[]) => {
+  await chrome.storage.local.set({ [TRASH_KEY]: trash.slice(0, TRASH_MAX_ENTRIES) })
+}
+
+export const addToTrash = async (lists: TabList[]) => {
+  if (lists.length === 0) return
+  const now = Date.now()
+  const existing = await getTrash()
+  await setTrash([...lists.map(list => ({ list, deletedAt: now })), ...existing])
+}
+
+export const STORAGE_KEYS = { LISTS_KEY, OPTS_KEY, SYNC_CONFIG_KEY, SYNC_STATE_KEY, TOMBSTONES_KEY, TRASH_KEY }

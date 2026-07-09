@@ -18,6 +18,7 @@ export const migrateFromV1 = async () => {
       }
     }
     if (old.defaultNightMode === true) migrated.theme = 'dark'
+    if (typeof old.openEnd === 'boolean') migrated.restorePosition = old.openEnd ? 'end' : 'start'
     // v1 also had browserAction: 'none', which has no MV3 equivalent
     if (!BROWSER_ACTIONS.includes(migrated.browserAction)) migrated.browserAction = 'popup'
     await setOptions(migrated)

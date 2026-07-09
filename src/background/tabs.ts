@@ -159,7 +159,7 @@ const regroupTabs = async (created: { id: number; group?: TabGroupInfo }[]) => {
 export const restoreTabs = async (tabs: TabItem[], windowId?: number) => {
   const opts = await getOptions()
   let indexOffset = 0
-  if (opts.openEnd) {
+  if (opts.restorePosition !== 'start') {
     const existing = windowId != null ? await getAllInWindow(windowId) : await getAllTabsInCurrentWindow()
     indexOffset = (existing.at(-1)?.index ?? -1) + 1
   }
@@ -178,8 +178,10 @@ export const restoreTabs = async (tabs: TabItem[], windowId?: number) => {
   await regroupTabs(created)
 }
 
-export const restoreList = async (list: TabList, { windowId, newWindow = false }: { windowId?: number; newWindow?: boolean } = {}) => {
-  if (newWindow) {
+export const restoreList = async (list: TabList, { windowId, newWindow }: { windowId?: number; newWindow?: boolean } = {}) => {
+  // explicit request wins; otherwise the restorePosition option decides
+  const openInNewWindow = newWindow ?? (await getOptions()).restorePosition === 'new-window'
+  if (openInNewWindow) {
     const created = await chrome.windows.create({ url: list.tabs.map(t => t.url) })
     const createdTabs: { id: number; group?: TabGroupInfo }[] = []
     list.tabs.forEach((tab, index) => {
@@ -196,7 +198,7 @@ export const restoreList = async (list: TabList, { windowId, newWindow = false }
 }
 
 export const restoreLatestList = async () => {
-  const lists = await getLists()
+  const lists = (await getLists()).filter(l => !l.archived)
   const latest = lists.find(l => !l.pinned) ?? lists[0]
   if (!latest) return
   await restoreList(latest)

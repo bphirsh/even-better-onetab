@@ -1,5 +1,14 @@
 import { createNewTabList, normalizeList } from '../core/lists'
-import { addTombstones, getLists, getOptions, setLists } from '../core/storage'
+import {
+  addToTrash,
+  addTombstones,
+  getLists,
+  getOptions,
+  getTrash,
+  removeTombstones,
+  setLists,
+  setTrash,
+} from '../core/storage'
 import type { TabList } from '../core/types'
 import { schedulePush } from './sync'
 
@@ -21,20 +30,36 @@ const touch = (list: TabList) => {
 export const mutateLists = (fn: (lists: TabList[]) => TabList[] | void, sync = true) =>
   enqueue(async () => {
     const lists = await getLists()
-    const beforeIds = new Set(lists.map(l => l._id))
+    const byId = new Map(lists.map(l => [l._id, l]))
     const result = fn(lists) ?? lists
-    // Tombstone anything that disappeared so sync propagates the deletion.
-    for (const list of result) beforeIds.delete(list._id)
-    if (beforeIds.size > 0) await addTombstones([...beforeIds])
+    const presentIds = new Set(result.map(l => l._id))
+    const removed = [...byId.values()].filter(l => !presentIds.has(l._id))
+    if (removed.length > 0) {
+      // Tombstone so sync propagates the deletion; trash so History can recover it.
+      await addTombstones(removed.map(l => l._id))
+      await addToTrash(removed)
+    }
     await setLists(result)
     if (sync) schedulePush()
   })
 
-export const addList = (partial: Partial<TabList>, index?: number) => {
+export const addList = async (partial: Partial<TabList>, index?: number) => {
   const list = createNewTabList(partial)
-  return mutateLists(lists => {
+  await mutateLists(lists => {
     lists.splice(Math.max(0, Math.min(index ?? 0, lists.length)), 0, list)
-  }).then(() => list)
+  })
+  // a resurrected id must not be re-deleted by the next sync merge
+  await removeTombstones([list._id])
+  return list
+}
+
+/** Recovers a deleted list from History; bumping updatedAt keeps merge from re-deleting it. */
+export const restoreFromTrash = async (listId: string) => {
+  const trash = await getTrash()
+  const entry = trash.find(t => t.list._id === listId)
+  if (!entry) throw new Error('That list is no longer in history')
+  await setTrash(trash.filter(t => t.list._id !== listId))
+  return addList({ ...entry.list, updatedAt: Date.now() })
 }
 
 export const updateList = (id: string, patch: Partial<TabList>) =>
