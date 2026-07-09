@@ -74,8 +74,9 @@
         <button class="btn danger" onclick={() => pickFile('replace')}>Replace</button>
       </div>
     </div>
-    <input type="file" accept=".json,application/json" hidden bind:this={fileInput} onchange={onFile} />
   </div>
+  <!-- outside the card so .row:last-child still removes the final divider -->
+  <input type="file" accept=".json,application/json" hidden bind:this={fileInput} onchange={onFile} />
 </section>
 
 <style>
