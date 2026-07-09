@@ -12,7 +12,9 @@ const TRASH_KEY = 'trash'
 const TAB_TRASH_KEY = 'tabTrash'
 
 const TOMBSTONE_TTL = 30 * 86_400_000
-const TRASH_MAX_ENTRIES = 50
+// Retention time is the real policy; this cap is only a quota backstop
+// (storage.local is 10 MB shared with the lists themselves).
+const TRASH_MAX_ENTRIES = 500
 
 const TRASH_RETENTION_MS: Record<Options['trashRetention'], number> = {
   immediately: 0,
