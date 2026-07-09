@@ -136,6 +136,18 @@
           <option value="open">Opens it and keeps it in the list</option>
         </select>
       </div>
+      <label class="row">
+        <div class="text">
+          <div class="label">Switch to the opened tab</div>
+          <div class="desc">Off, clicked tabs open in the background and you stay on this page.</div>
+        </div>
+        <input
+          type="checkbox"
+          class="switch"
+          checked={app.opts.focusOpenedTab}
+          onchange={e => update('focusOpenedTab', e.currentTarget.checked)}
+        />
+      </label>
       <div class="row">
         <div class="text">
           <div class="label">Opening a list puts its tabs</div>

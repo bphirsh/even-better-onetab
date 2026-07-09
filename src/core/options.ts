@@ -9,6 +9,8 @@ export interface Options {
   browserAction: BrowserAction
   /** What clicking a stored tab in the list page does. */
   itemClickAction: 'open-and-remove' | 'open'
+  /** Switch to the tab a click opens (off = open it in the background). */
+  focusOpenedTab: boolean
   itemDisplay: 'title-and-url' | 'title' | 'url'
   hideFavicon: boolean
   /** Add stored tabs to browser history so they stay findable in the address bar. */
@@ -42,6 +44,7 @@ export const DEFAULT_OPTIONS: Options = {
   density: 'compact',
   browserAction: 'popup',
   itemClickAction: 'open-and-remove',
+  focusOpenedTab: true,
   itemDisplay: 'title-and-url',
   hideFavicon: false,
   addHistory: true,

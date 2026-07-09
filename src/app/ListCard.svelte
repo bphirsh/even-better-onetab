@@ -143,7 +143,7 @@
   const openTab = (index: number) => {
     const tab = list.tabs[index]
     if (!tab) return
-    chrome.tabs.create({ url: tab.url, active: false })
+    chrome.tabs.create({ url: tab.url, active: app.opts.focusOpenedTab })
     if (app.opts.itemClickAction === 'open-and-remove') {
       const tabs = list.tabs.filter((_, i) => i !== index)
       act({ type: 'list-update', id: list._id, patch: { tabs } })
