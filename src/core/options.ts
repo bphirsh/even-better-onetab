@@ -25,6 +25,8 @@ export interface Options {
   allContext: boolean
   /** Ask for confirmation before deleting a list (off by default — deletion has Undo and History). */
   alertRemoveList: boolean
+  /** How long deleted lists stay recoverable in History (locally). */
+  trashRetention: 'immediately' | 'day' | 'week' | 'month'
   /** Skip about:/chrome:/file: etc. URLs when storing. */
   excludeIllegalURL: boolean
   /** Deduplicate tabs by URL within each list when saving. */
@@ -53,6 +55,7 @@ export const DEFAULT_OPTIONS: Options = {
   pageContext: true,
   allContext: false,
   alertRemoveList: false,
+  trashRetention: 'month',
   excludeIllegalURL: true,
   removeDuplicate: false,
   restorePosition: 'end',

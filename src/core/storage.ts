@@ -11,8 +11,16 @@ const TOMBSTONES_KEY = 'syncTombstones'
 const TRASH_KEY = 'trash'
 
 const TOMBSTONE_TTL = 30 * 86_400_000
-const TRASH_TTL = 30 * 86_400_000
 const TRASH_MAX_ENTRIES = 50
+
+const TRASH_RETENTION_MS: Record<Options['trashRetention'], number> = {
+  immediately: 0,
+  day: 86_400_000,
+  week: 7 * 86_400_000,
+  month: 30 * 86_400_000,
+}
+
+const getTrashTtl = async () => TRASH_RETENTION_MS[(await getOptions()).trashRetention] ?? TRASH_RETENTION_MS.month
 
 export const getLists = async (): Promise<TabList[]> => {
   const { [LISTS_KEY]: lists } = await chrome.storage.local.get(LISTS_KEY)
@@ -91,8 +99,9 @@ export const removeTombstones = async (ids: string[]) => {
 
 export const getTrash = async (): Promise<TrashEntry[]> => {
   const { [TRASH_KEY]: trash } = await chrome.storage.local.get(TRASH_KEY)
+  const ttl = await getTrashTtl()
   const now = Date.now()
-  return Array.isArray(trash) ? trash.filter(t => now - t.deletedAt < TRASH_TTL) : []
+  return Array.isArray(trash) ? trash.filter(t => now - t.deletedAt < ttl) : []
 }
 
 export const setTrash = async (trash: TrashEntry[]) => {
@@ -101,6 +110,7 @@ export const setTrash = async (trash: TrashEntry[]) => {
 
 export const addToTrash = async (lists: TabList[]) => {
   if (lists.length === 0) return
+  if ((await getTrashTtl()) === 0) return
   const now = Date.now()
   const existing = await getTrash()
   await setTrash([...lists.map(list => ({ list, deletedAt: now })), ...existing])

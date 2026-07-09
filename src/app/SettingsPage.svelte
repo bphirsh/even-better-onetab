@@ -165,7 +165,7 @@
       <label class="row">
         <div class="text">
           <div class="label">Confirm before deleting a list</div>
-          <div class="desc">Deletions can be undone, and stay recoverable in History for 30 days.</div>
+          <div class="desc">Deletions can be undone, and stay recoverable in History.</div>
         </div>
         <input
           type="checkbox"
@@ -174,6 +174,22 @@
           onchange={e => update('alertRemoveList', e.currentTarget.checked)}
         />
       </label>
+      <div class="row">
+        <div class="text">
+          <div class="label">Deleted lists are</div>
+          <div class="desc">Kept lists can be recovered from the History page (on this device only).</div>
+        </div>
+        <select
+          class="select"
+          value={app.opts.trashRetention}
+          onchange={e => update('trashRetention', e.currentTarget.value as Options['trashRetention'])}
+        >
+          <option value="immediately">Removed immediately</option>
+          <option value="day">Kept for 1 day</option>
+          <option value="week">Kept for 1 week</option>
+          <option value="month">Kept for 1 month</option>
+        </select>
+      </div>
     </div>
   </section>
 

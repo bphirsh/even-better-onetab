@@ -9,7 +9,26 @@
 
   const archived = $derived(app.lists.filter(l => l.archived))
 
+  const retentionLabel = $derived(
+    ({ immediately: 'removed immediately', day: 'kept for 1 day', week: 'kept for 1 week', month: 'kept for 1 month' })[
+      app.opts.trashRetention
+    ],
+  )
+
+  let expanded = $state<Record<string, boolean>>({})
+  const toggle = (key: string) => (expanded[key] = !expanded[key])
+
   const label = (list: TabList) => list.title || `${list.tabs.length} tab${list.tabs.length === 1 ? '' : 's'}`
+
+  const domain = (url: string) => {
+    try {
+      return new URL(url).hostname
+    } catch {
+      return url
+    }
+  }
+
+  const openTab = (url: string) => chrome.tabs.create({ url, active: app.opts.focusOpenedTab })
 
   const unarchive = (id: string) => act({ type: 'list-update', id, patch: { archived: false } }, 'Moved back to Lists')
 
@@ -18,7 +37,7 @@
   const deleteList = async (list: TabList) => {
     if (app.opts.alertRemoveList && !confirm(`Delete “${label(list)}”?`)) return
     const { ok } = await act({ type: 'list-remove', id: list._id })
-    if (ok) toast('List deleted — recoverable below for 30 days')
+    if (ok) toast(app.opts.trashRetention === 'immediately' ? 'List deleted' : 'List deleted — recoverable below')
   }
 
   const recover = async (id: string) => {
@@ -26,6 +45,17 @@
     if (ok) toast('List recovered — it’s back in Lists')
   }
 </script>
+
+{#snippet tabsPreview(list: TabList)}
+  <div class="tab-list">
+    {#each list.tabs as tab, i (i)}
+      <button class="tab" title={tab.url} onclick={() => openTab(tab.url)}>
+        <span class="tab-title">{tab.title || tab.url}</span>
+        <span class="tab-domain">{domain(tab.url)}</span>
+      </button>
+    {/each}
+  </div>
+{/snippet}
 
 <div class="page">
   <h1>Archive &amp; history</h1>
@@ -37,21 +67,38 @@
     {:else}
       <div class="card">
         {#each archived as list (list._id)}
-          <div class="row">
-            <span class="color-dot" style:background={colorOf(list.color) ?? 'var(--border)'}></span>
-            <div class="text">
-              <div class="label" class:untitled={!list.title}>{label(list)}</div>
-              <div class="desc">{list.tabs.length} tab{list.tabs.length === 1 ? '' : 's'} · stored {timeAgo(list.time)}</div>
+          <div class="entry">
+            <div
+              class="row"
+              role="button"
+              tabindex="0"
+              onclick={() => toggle(list._id)}
+              onkeydown={e => e.key === 'Enter' && toggle(list._id)}
+            >
+              <span class="chevron" class:open={expanded[list._id]}><Icon name="chevron" size={14} /></span>
+              <span class="color-dot" style:background={colorOf(list.color) ?? 'var(--border)'}></span>
+              <div class="text">
+                <div class="label" class:untitled={!list.title}>{label(list)}</div>
+                <div class="desc">{list.tabs.length} tab{list.tabs.length === 1 ? '' : 's'} · stored {timeAgo(list.time)}</div>
+              </div>
+              <div class="actions">
+                <button class="btn" onclick={e => (e.stopPropagation(), openList(list._id))}>Open</button>
+                <button class="btn" onclick={e => (e.stopPropagation(), unarchive(list._id))}>
+                  <Icon name="upload" size={13} /> Unarchive
+                </button>
+                <button
+                  class="btn danger"
+                  title="Delete list"
+                  aria-label="Delete list"
+                  onclick={e => (e.stopPropagation(), deleteList(list))}
+                >
+                  <Icon name="trash" size={13} />
+                </button>
+              </div>
             </div>
-            <div class="actions">
-              <button class="btn" onclick={() => openList(list._id)}>Open</button>
-              <button class="btn" onclick={() => unarchive(list._id)}>
-                <Icon name="upload" size={13} /> Unarchive
-              </button>
-              <button class="btn danger" title="Delete list" aria-label="Delete list" onclick={() => deleteList(list)}>
-                <Icon name="trash" size={13} />
-              </button>
-            </div>
+            {#if expanded[list._id]}
+              {@render tabsPreview(list)}
+            {/if}
           </div>
         {/each}
       </div>
@@ -60,26 +107,45 @@
 
   <section>
     <h2>Recently deleted</h2>
-    {#if app.trash.length === 0}
-      <p class="empty">No deleted lists. Deleted lists are kept here for 30 days (on this device only).</p>
+    {#if app.opts.trashRetention === 'immediately' && app.trash.length === 0}
+      <p class="empty">Deleted lists are removed immediately — change “Deleted lists are” in Settings to keep them recoverable here.</p>
+    {:else if app.trash.length === 0}
+      <p class="empty">No deleted lists. Deleted lists are {retentionLabel} on this device.</p>
     {:else}
       <div class="card">
         {#each app.trash as entry (entry.list._id + entry.deletedAt)}
-          <div class="row">
-            <span class="color-dot" style:background={colorOf(entry.list.color) ?? 'var(--border)'}></span>
-            <div class="text">
-              <div class="label" class:untitled={!entry.list.title}>{label(entry.list)}</div>
-              <div class="desc">{entry.list.tabs.length} tab{entry.list.tabs.length === 1 ? '' : 's'} · deleted {timeAgo(entry.deletedAt)}</div>
+          {@const key = entry.list._id + entry.deletedAt}
+          <div class="entry">
+            <div
+              class="row"
+              role="button"
+              tabindex="0"
+              onclick={() => toggle(key)}
+              onkeydown={e => e.key === 'Enter' && toggle(key)}
+            >
+              <span class="chevron" class:open={expanded[key]}><Icon name="chevron" size={14} /></span>
+              <span class="color-dot" style:background={colorOf(entry.list.color) ?? 'var(--border)'}></span>
+              <div class="text">
+                <div class="label" class:untitled={!entry.list.title}>{label(entry.list)}</div>
+                <div class="desc">{entry.list.tabs.length} tab{entry.list.tabs.length === 1 ? '' : 's'} · deleted {timeAgo(entry.deletedAt)}</div>
+              </div>
+              <div class="actions">
+                <button class="btn" onclick={e => (e.stopPropagation(), recover(entry.list._id))}>
+                  <Icon name="restore" size={13} /> Recover
+                </button>
+              </div>
             </div>
-            <div class="actions">
-              <button class="btn" onclick={() => recover(entry.list._id)}>
-                <Icon name="restore" size={13} /> Recover
-              </button>
-            </div>
+            {#if expanded[key]}
+              {@render tabsPreview(entry.list)}
+            {/if}
           </div>
         {/each}
       </div>
-      <p class="note">Deleted lists are kept for 30 days on this device, then cleared automatically.</p>
+      {#if app.opts.trashRetention === 'immediately'}
+        <p class="note">New deletions are removed immediately — these entries disappear when the page reloads.</p>
+      {:else}
+        <p class="note">Deleted lists are {retentionLabel} on this device, then cleared automatically.</p>
+      {/if}
     {/if}
   </section>
 </div>
@@ -118,16 +184,37 @@
     padding: 4px 16px;
   }
 
-  .row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 0;
+  .entry {
     border-bottom: 1px solid var(--border);
   }
 
-  .row:last-child {
+  .entry:last-child {
     border-bottom: none;
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .chevron {
+    display: inline-flex;
+    color: var(--text-3);
+    flex-shrink: 0;
+  }
+
+  .chevron :global(svg) {
+    transition: transform 0.15s ease;
+    transform: rotate(-90deg);
+  }
+
+  .chevron.open :global(svg) {
+    transform: rotate(0deg);
   }
 
   .color-dot {
@@ -167,6 +254,47 @@
   .actions .btn {
     padding: 5px 10px;
     font-size: 12.5px;
+  }
+
+  .tab-list {
+    display: flex;
+    flex-direction: column;
+    padding: 0 0 10px 24px;
+  }
+
+  .tab {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    text-align: left;
+    min-width: 0;
+    cursor: pointer;
+  }
+
+  .tab:hover {
+    background: var(--surface-hover);
+  }
+
+  :global([data-theme='dark']) .tab:hover {
+    background: var(--surface-2);
+  }
+
+  .tab-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tab-domain {
+    flex-shrink: 1;
+    min-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    color: var(--text-3);
   }
 
   .empty,
