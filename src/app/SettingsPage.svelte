@@ -23,7 +23,11 @@
   ]
 
   const menuToggles: ToggleDef[] = [
-    { key: 'pageContext', label: 'Show in page right-click menu' },
+    {
+      key: 'pageContext',
+      label: 'Show in page right-click menu',
+      desc: 'Adds an “Even Better OneTab” submenu when right-clicking a webpage. Off, the actions only appear when right-clicking the toolbar icon.',
+    },
     {
       key: 'allContext',
       label: 'Show on links, images and selections too',
@@ -87,13 +91,6 @@
       <div class="row">
         <div class="text">
           <div class="label">Storing opens the list page</div>
-          <div class="desc">
-            {#if app.opts.openListPage === 'never'}
-              Storing all tabs leaves a new-tab page so the window isn’t left empty.
-            {:else}
-              So you land on your stored tabs instead of an empty window.
-            {/if}
-          </div>
         </div>
         <select
           class="select"
@@ -102,7 +99,7 @@
         >
           <option value="all-stored">When all tabs are stored</option>
           <option value="always">Whenever tabs are stored</option>
-          <option value="if-absent">When the window doesn’t have it</option>
+          <option value="if-absent">If not open in current window</option>
           <option value="never">Never</option>
         </select>
       </div>
