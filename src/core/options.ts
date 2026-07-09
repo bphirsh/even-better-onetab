@@ -56,5 +56,5 @@ export const DEFAULT_OPTIONS: Options = {
   excludeIllegalURL: true,
   removeDuplicate: false,
   restorePosition: 'end',
-  openListPage: 'all-stored',
+  openListPage: 'if-absent',
 }

@@ -19,7 +19,7 @@
     { key: 'excludeIllegalURL', label: 'Skip browser-internal pages', desc: 'about:, chrome:, file: and similar URLs are not stored.' },
     { key: 'removeDuplicate', label: 'Remove duplicate tabs within a list' },
     { key: 'addHistory', label: 'Keep stored tabs in browser history', desc: 'Stored tabs stay findable from the address bar.' },
-    { key: 'pinNewList', label: 'Pin new lists' },
+    { key: 'pinNewList', label: 'Pin new lists', desc: 'Pinned lists are protected from automatic removal (e.g. by the restore-latest shortcut).' },
   ]
 
   const menuToggles: ToggleDef[] = [
@@ -98,7 +98,7 @@
           onchange={e => update('openListPage', e.currentTarget.value as Options['openListPage'])}
         >
           <option value="all-stored">When all tabs are stored</option>
-          <option value="always">Whenever tabs are stored</option>
+          <option value="always">When any tabs are stored</option>
           <option value="if-absent">If not open in current window</option>
           <option value="never">Never</option>
         </select>
@@ -165,7 +165,7 @@
       <label class="row">
         <div class="text">
           <div class="label">Confirm before deleting a list</div>
-          <div class="desc">Off by default — deletions have Undo and stay recoverable in History for 30 days.</div>
+          <div class="desc">Deletions can be undone, and stay recoverable in History for 30 days.</div>
         </div>
         <input
           type="checkbox"
