@@ -12,7 +12,7 @@ import {
   setTabTrash,
   setTrash,
 } from '../core/storage'
-import type { TabItem, TabList } from '../core/types'
+import type { TabItem, TabList, TrashEntry, TrashTabEntry } from '../core/types'
 import { schedulePush } from './sync'
 
 // All list writes are funneled through this queue so concurrent messages from
@@ -65,24 +65,66 @@ export const restoreFromTrash = async (listId: string) => {
   return addList({ ...entry.list, updatedAt: Date.now() })
 }
 
-/** Explicit single-tab deletion; the removed tab goes to the tab trash for History. */
+/**
+ * Explicit single-tab deletion; the removed tab goes to the tab trash for
+ * History. The gesture decides the destination: even when this empties (and
+ * so removes) the list, History records a deleted *tab*, not a deleted list.
+ */
 export const removeTabFromList = async (listId: string, index: number, url: string) => {
   let removed: TabItem | undefined
   let listTitle = ''
+  let removedWholeList = false
   await mutateLists(lists => {
     const list = lists.find(l => l._id === listId)
     if (!list) return
-    let i = list.tabs[index]?.url === url ? index : list.tabs.findIndex(t => t.url === url)
+    const i = list.tabs[index]?.url === url ? index : list.tabs.findIndex(t => t.url === url)
     if (i < 0) return
-    // deleting the last tab deletes the list — trash it whole (tab included)
-    if (list.tabs.length === 1) return lists.filter(l => l._id !== listId)
     removed = list.tabs[i]
     listTitle = list.title
+    if (list.tabs.length === 1) {
+      removedWholeList = true
+      return lists.filter(l => l._id !== listId)
+    }
     list.tabs.splice(i, 1)
     touch(list)
   })
-  if (removed) await addToTabTrash([{ tab: removed, listId, listTitle }])
+  if (removed) {
+    if (removedWholeList) {
+      // mutateLists auto-trashed the removed list; take that entry back out
+      const trash = await getTrash()
+      await setTrash(trash.filter(t => t.list._id !== listId))
+    }
+    await addToTabTrash([{ tab: removed, listId, listTitle }])
+  }
 }
+
+/** Permanently drops a deleted-list entry from History. */
+export const deleteTrashEntry = (listId: string, deletedAt: number) =>
+  enqueue(async () => {
+    const trash = await getTrash()
+    await setTrash(trash.filter(t => !(t.list._id === listId && t.deletedAt === deletedAt)))
+  })
+
+/** Reinserts a deleted-list entry (undo of permanent delete). */
+export const putTrashEntry = (entry: TrashEntry) =>
+  enqueue(async () => {
+    const trash = await getTrash()
+    await setTrash([entry, ...trash])
+  })
+
+/** Permanently drops a deleted-tab entry from History. */
+export const deleteTabTrashEntry = (id: string) =>
+  enqueue(async () => {
+    const trash = await getTabTrash()
+    await setTabTrash(trash.filter(t => t.id !== id))
+  })
+
+/** Reinserts a deleted-tab entry (undo of permanent delete). */
+export const putTabTrashEntry = (entry: TrashTabEntry) =>
+  enqueue(async () => {
+    const trash = await getTabTrash()
+    await setTabTrash([entry, ...trash])
+  })
 
 /** Recovers a deleted tab into its original list, or a recreated one if it's gone. */
 export const restoreTabFromTrash = async (entryId: string) => {

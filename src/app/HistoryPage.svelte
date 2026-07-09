@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TabList } from '../core/types'
+  import type { TabItem, TabList, TrashEntry, TrashTabEntry } from '../core/types'
   import { colorOf } from '../ui/colors'
   import Icon from '../ui/Icon.svelte'
   import { app } from '../ui/state.svelte'
@@ -55,12 +55,43 @@
     const { ok } = await act({ type: 'tab-trash-restore', id })
     if (ok) toast('Tab recovered — it’s back in its list')
   }
+
+  const deleteListForever = async (entry: TrashEntry) => {
+    const copy = $state.snapshot(entry) as TrashEntry
+    const { ok } = await act({ type: 'trash-delete', id: entry.list._id, deletedAt: entry.deletedAt })
+    if (ok) toast('List permanently deleted', 'info', { label: 'Undo', fn: () => act({ type: 'trash-put', entry: copy }) })
+  }
+
+  const deleteTabForever = async (entry: TrashTabEntry) => {
+    const copy = $state.snapshot(entry) as TrashTabEntry
+    const { ok } = await act({ type: 'tab-trash-delete', id: entry.id })
+    if (ok) toast('Tab permanently deleted', 'info', { label: 'Undo', fn: () => act({ type: 'tab-trash-put', entry: copy }) })
+  }
 </script>
+
+{#snippet favicon(tab: TabItem)}
+  <span class="fav">
+    {#if tab.favIconUrl}
+      <img
+        src={tab.favIconUrl}
+        alt=""
+        loading="lazy"
+        onerror={e => {
+          const img = e.currentTarget as HTMLImageElement
+          if (img.parentElement) img.parentElement.textContent = (tab.title || tab.url).charAt(0).toUpperCase()
+        }}
+      />
+    {:else}
+      {(tab.title || tab.url).charAt(0).toUpperCase()}
+    {/if}
+  </span>
+{/snippet}
 
 {#snippet tabsPreview(list: TabList)}
   <div class="tab-list">
     {#each list.tabs as tab, i (i)}
       <button class="tab" title={tab.url} onclick={() => openTab(tab.url)}>
+        {@render favicon(tab)}
         <span class="tab-title">{tab.title || tab.url}</span>
         <span class="tab-domain">{domain(tab.url)}</span>
       </button>
@@ -144,6 +175,14 @@
                 <button class="btn" onclick={e => (e.stopPropagation(), recover(entry.list._id))}>
                   <Icon name="restore" size={13} /> Recover
                 </button>
+                <button
+                  class="btn danger"
+                  title="Delete permanently"
+                  aria-label="Delete permanently"
+                  onclick={e => (e.stopPropagation(), deleteListForever(entry))}
+                >
+                  <Icon name="trash" size={13} />
+                </button>
               </div>
             </div>
             {#if expanded[key]}
@@ -176,6 +215,7 @@
         {#each visibleTabTrash as entry (entry.id)}
           <div class="entry">
             <div class="row static">
+              {@render favicon(entry.tab)}
               <div class="text">
                 <div class="label">{entry.tab.title || entry.tab.url}</div>
                 <div class="desc">
@@ -186,6 +226,14 @@
                 <button class="btn" onclick={() => openTab(entry.tab.url)}>Open</button>
                 <button class="btn" onclick={() => recoverTab(entry.id)}>
                   <Icon name="restore" size={13} /> Recover
+                </button>
+                <button
+                  class="btn danger"
+                  title="Delete permanently"
+                  aria-label="Delete permanently"
+                  onclick={() => deleteTabForever(entry)}
+                >
+                  <Icon name="trash" size={13} />
                 </button>
               </div>
             </div>
@@ -348,6 +396,27 @@
 
   .row.static {
     cursor: default;
+  }
+
+  .fav {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-2);
+    color: var(--text-3);
+    font-size: 10px;
+    font-weight: 600;
+    overflow: hidden;
+  }
+
+  .fav img {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
   }
 
   .see-all {

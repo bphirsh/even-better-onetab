@@ -1,4 +1,4 @@
-import type { SyncState, TabList } from './types'
+import type { SyncState, TabList, TrashEntry, TrashTabEntry } from './types'
 
 export type StoreWhich = 'selected' | 'all' | 'all-windows' | 'left' | 'right' | 'twoside'
 
@@ -13,6 +13,10 @@ export type Message =
   | { type: 'trash-restore'; id: string }
   | { type: 'tab-remove'; listId: string; index: number; url: string }
   | { type: 'tab-trash-restore'; id: string }
+  | { type: 'trash-delete'; id: string; deletedAt: number }
+  | { type: 'trash-put'; entry: TrashEntry }
+  | { type: 'tab-trash-delete'; id: string }
+  | { type: 'tab-trash-put'; entry: TrashTabEntry }
   | { type: 'open-lists' }
   | { type: 'sync-setup'; token: string }
   | { type: 'sync-push' }
