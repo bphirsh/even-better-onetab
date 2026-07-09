@@ -142,7 +142,7 @@
 
   const openTab = (index: number) => {
     const tab = list.tabs[index]
-    if (!tab || app.opts.itemClickAction === 'none') return
+    if (!tab) return
     chrome.tabs.create({ url: tab.url, active: false })
     if (app.opts.itemClickAction === 'open-and-remove') {
       const tabs = list.tabs.filter((_, i) => i !== index)

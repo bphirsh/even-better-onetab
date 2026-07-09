@@ -86,7 +86,7 @@
       aria-label="Archive & history"
       onclick={() => toggleRoute('history')}
     >
-      <Icon name="restore" size={16} />
+      <Icon name="archive" size={16} />
     </button>
     <button
       class="icon-btn nav-btn"

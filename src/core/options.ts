@@ -8,7 +8,7 @@ export interface Options {
   /** What clicking the toolbar button does. Anything but 'popup' clears the popup so the click reaches the service worker. */
   browserAction: BrowserAction
   /** What clicking a stored tab in the list page does. */
-  itemClickAction: 'open-and-remove' | 'open' | 'none'
+  itemClickAction: 'open-and-remove' | 'open'
   itemDisplay: 'title-and-url' | 'title' | 'url'
   hideFavicon: boolean
   /** Add stored tabs to browser history so they stay findable in the address bar. */

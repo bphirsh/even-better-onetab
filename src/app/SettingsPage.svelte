@@ -25,7 +25,11 @@
 
   const menuToggles: ToggleDef[] = [
     { key: 'pageContext', label: 'Show in page right-click menu' },
-    { key: 'allContext', label: 'Show on links and images too' },
+    {
+      key: 'allContext',
+      label: 'Show on links, images and selections too',
+      desc: 'Include the menu when right-clicking a link, image, video, or selected text — not just empty page area.',
+    },
   ]
 </script>
 
@@ -112,7 +116,6 @@
         >
           <option value="open-and-remove">Opens it and removes it from the list</option>
           <option value="open">Opens it and keeps it in the list</option>
-          <option value="none">Does nothing</option>
         </select>
       </div>
       <div class="row">
@@ -164,7 +167,7 @@
           onchange={e => update('browserAction', e.currentTarget.value as Options['browserAction'])}
         >
           <option value="popup">Opens the popup</option>
-          <option value="store-selected">Stores the selected tabs</option>
+          <option value="store-selected">Stores selected tabs</option>
           <option value="store-all">Stores all tabs</option>
           <option value="show-list">Opens the list page</option>
         </select>
@@ -173,6 +176,7 @@
         <label class="row">
           <div class="text">
             <div class="label">{t.label}</div>
+            {#if t.desc}<div class="desc">{t.desc}</div>{/if}
           </div>
           <input
             type="checkbox"
