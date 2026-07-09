@@ -1,4 +1,4 @@
-import type { Snapshot, TabItem, TabList } from './types'
+import type { Snapshot, TabItem, TabList, Tombstone } from './types'
 
 export const ILLEGAL_URLS = ['about:', 'chrome:', 'chrome-extension:', 'brave:', 'edge:', 'file:', 'view-source:', 'wss:', 'ws:']
 
@@ -20,6 +20,9 @@ export const normalizeTab = (tab: Partial<TabItem>): TabItem => ({
   ...(tab.favIconUrl ? { favIconUrl: tab.favIconUrl } : {}),
   ...(tab.pinned ? { pinned: true } : {}),
   ...(tab.muted ? { muted: true } : {}),
+  ...(tab.group
+    ? { group: { title: String(tab.group.title ?? ''), color: String(tab.group.color || 'grey') } }
+    : {}),
 })
 
 export const createNewTabList = (partial: Partial<TabList> = {}): TabList => ({
@@ -40,10 +43,11 @@ export const validateList = (list: unknown): list is Partial<TabList> & { tabs: 
 /** Keep only persisted properties (drops transient UI state like the old `titleEditing`). */
 export const normalizeList = (list: Partial<TabList>): TabList => createNewTabList(list)
 
-export const createSnapshot = (lists: TabList[]): Snapshot => ({
+export const createSnapshot = (lists: TabList[], tombstones: Tombstone[] = []): Snapshot => ({
   format: 'better-onetab/2',
   exportedAt: Date.now(),
   lists: lists.map(normalizeList),
+  tombstones,
 })
 
 /** Accepts a v2 snapshot or a bare v1 lists array; returns lists or throws. */
@@ -51,4 +55,10 @@ export const parseSnapshot = (data: unknown): TabList[] => {
   const raw = Array.isArray(data) ? data : (data as Snapshot)?.lists
   if (!Array.isArray(raw)) throw new Error('Unrecognized backup format')
   return raw.filter(validateList).map(normalizeList)
+}
+
+export const parseTombstones = (data: unknown): Tombstone[] => {
+  const raw = (data as Snapshot)?.tombstones
+  if (!Array.isArray(raw)) return []
+  return raw.filter(t => t && typeof t.id === 'string' && typeof t.deletedAt === 'number')
 }

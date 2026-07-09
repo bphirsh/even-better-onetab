@@ -1,7 +1,7 @@
 import { handleMenuClick, rebuildMenus } from './background/menus'
 import { migrateFromV1 } from './background/migrate'
 import { addList, removeList, reorderList, replaceLists, updateList } from './background/mutations'
-import { SYNC_ALARM, pullSnapshot, pushNow, setupSync } from './background/sync'
+import { SYNC_ALARM, autoPullMerge, pullMerge, pushNow, setupSync } from './background/sync'
 import {
   openTabLists,
   restoreLatestList,
@@ -41,6 +41,7 @@ chrome.runtime.onInstalled.addListener(details => {
 chrome.runtime.onStartup.addListener(() => {
   rebuildMenus()
   applyBrowserAction()
+  autoPullMerge()
 })
 
 chrome.contextMenus.onClicked.addListener(info => {
@@ -88,7 +89,7 @@ const handleMessage = async (message: Message, sender: chrome.runtime.MessageSen
     case 'store-tabs':
       return storeHandlers[message.which](message.listId)
     case 'list-add':
-      return addList(message.list)
+      return addList(message.list, message.index)
     case 'list-update':
       return updateList(message.id, message.patch)
     case 'list-remove':
@@ -111,11 +112,8 @@ const handleMessage = async (message: Message, sender: chrome.runtime.MessageSen
       return setupSync(message.token)
     case 'sync-push':
       return pushNow()
-    case 'sync-pull': {
-      const lists = await pullSnapshot()
-      await replaceLists(lists, false)
-      return { count: lists.length }
-    }
+    case 'sync-pull':
+      return pullMerge()
   }
 }
 

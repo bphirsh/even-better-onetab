@@ -4,7 +4,7 @@ export type StoreWhich = 'selected' | 'all' | 'all-windows' | 'left' | 'right' |
 
 export type Message =
   | { type: 'store-tabs'; which: StoreWhich; listId?: string }
-  | { type: 'list-add'; list: Partial<TabList> }
+  | { type: 'list-add'; list: Partial<TabList>; index?: number }
   | { type: 'list-update'; id: string; patch: Partial<TabList> }
   | { type: 'list-remove'; id: string }
   | { type: 'lists-reorder'; id: string; toIndex: number }

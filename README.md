@@ -1,4 +1,4 @@
-# Better OneTab
+# Even Better OneTab
 
 Store and restore your browser tabs in one click — a cleaner, faster OneTab alternative for
 Chrome and Brave.
@@ -10,12 +10,18 @@ services except the optional GitHub Gist sync you control.
 ## Features
 
 - **Store tabs** — all tabs, selected tabs, tabs to the left/right, or all windows, via the
-  toolbar popup, right-click menu, or keyboard shortcuts.
+  toolbar popup, right-click menu, or keyboard shortcuts. The toolbar button itself is
+  configurable (popup, store selected, store all, or open the list page).
+- **Tab groups survive** — stored tabs remember their tab group (name + color) and are
+  re-grouped on restore.
 - **Organize** — name lists, tag them, color them, pin them; drag tabs to reorder or move
-  between lists; drag lists to reorder.
+  between lists; drag lists to reorder. Deleting is safe: every destructive action gets an
+  Undo toast.
 - **Search** across all stored tabs, filter by tag.
+- **Copy as Markdown** — turn any list into `- [title](url)` lines for pasting into notes.
 - **Sync & backup via GitHub Gist** — your lists upload to a private gist you own shortly after
-  every change. The gist's revision history doubles as backup history.
+  every change, and merge back on browser startup (newer edits win, deletions propagate), so
+  two desktops converge. The gist's revision history doubles as backup history.
 - **Mobile viewer** — a single static page that reads the gist so you can browse and open your
   saved tabs from a phone.
 - **Import/export** as JSON (same format as sync).

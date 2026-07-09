@@ -15,9 +15,9 @@
     const token = tokenDraft.trim()
     if (!token) return
     busy = true
-    const result = await act<{ gistId: string }>({ type: 'sync-setup', token })
+    const { ok } = await act<{ gistId: string }>({ type: 'sync-setup', token })
     busy = false
-    if (result) {
+    if (ok) {
       tokenDraft = ''
       toast('Sync connected — lists uploaded to your private gist')
     }
@@ -32,11 +32,10 @@
   }
 
   const pull = async () => {
-    if (!confirm('Replace the lists on this device with the synced copy from the gist?')) return
     busy = true
-    const result = await act<{ count: number }>({ type: 'sync-pull' })
+    const { ok, result } = await act<{ count: number }>({ type: 'sync-pull' })
     busy = false
-    if (result) toast(`Loaded ${result.count} lists from the gist`)
+    if (ok && result) toast(`Merged with the gist — ${result.count} lists`)
   }
 
   const disconnect = () => {
@@ -82,7 +81,8 @@
           <div class="desc">
             Uploads to
             <a href={`https://gist.github.com/${app.syncConfig.gistId}`} target="_blank" rel="noreferrer">your private gist</a>
-            shortly after every change.
+            shortly after every change, and merges from it on browser startup. Newer edits win;
+            deletions sync too.
           </div>
         </div>
         <input
@@ -111,7 +111,7 @@
             <Icon name="refresh" size={14} /> Sync now
           </button>
           <button class="btn" disabled={busy} onclick={pull}>
-            <Icon name="download" size={14} /> Load from gist
+            <Icon name="download" size={14} /> Merge from gist
           </button>
         </div>
       </div>

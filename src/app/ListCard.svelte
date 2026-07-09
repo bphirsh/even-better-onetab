@@ -5,6 +5,7 @@
   import Icon from '../ui/Icon.svelte'
   import { app } from '../ui/state.svelte'
   import { timeAgo } from '../ui/time'
+  import { toast } from '../ui/toast.svelte'
   import { act } from './actions'
   import TabRow from './TabRow.svelte'
 
@@ -89,15 +90,43 @@
     act({ type: 'list-update', id: list._id, patch: { color } })
   }
 
-  const restore = (newWindow = false, remove = false) => {
+  /** Captures the list and its position so an undo can put it right back. */
+  const captureForUndo = () => ({
+    copy: $state.snapshot(list) as TabList,
+    index: Math.max(0, app.lists.findIndex(l => l._id === list._id)),
+  })
+
+  const undoAction = ({ copy, index }: ReturnType<typeof captureForUndo>) => ({
+    label: 'Undo',
+    fn: () => act({ type: 'list-add', list: copy, index }),
+  })
+
+  const restore = async (newWindow = false, remove = false) => {
     menuOpen = false
-    act({ type: 'restore-list', id: list._id, newWindow, remove })
+    if (!remove) {
+      act({ type: 'restore-list', id: list._id, newWindow })
+      return
+    }
+    const captured = captureForUndo()
+    const { ok } = await act({ type: 'restore-list', id: list._id, newWindow, remove: true })
+    if (ok) toast('List restored & removed', 'info', undoAction(captured))
   }
 
-  const removeListNow = () => {
+  const removeListNow = async () => {
     menuOpen = false
     if (app.opts.alertRemoveList && !confirm(`Delete “${list.title || `${list.tabs.length} tabs`}”?`)) return
-    act({ type: 'list-remove', id: list._id })
+    const captured = captureForUndo()
+    const { ok } = await act({ type: 'list-remove', id: list._id })
+    if (ok) toast('List deleted', 'info', undoAction(captured))
+  }
+
+  const copyMarkdown = async () => {
+    menuOpen = false
+    const escapeTitle = (s: string) => s.replace(/[\[\]]/g, m => '\\' + m)
+    const lines = list.tabs.map(t => `- [${escapeTitle(t.title || t.url)}](${t.url})`)
+    const text = (list.title ? `## ${list.title}\n\n` : '') + lines.join('\n') + '\n'
+    await navigator.clipboard.writeText(text)
+    toast('Copied as Markdown')
   }
 
   const openTab = (index: number) => {
@@ -186,6 +215,9 @@
             </button>
             <button class="menu-item" onclick={startTagsEdit}>
               <Icon name="tag" size={14} /> Edit tags
+            </button>
+            <button class="menu-item" onclick={copyMarkdown}>
+              <Icon name="copy" size={14} /> Copy as Markdown
             </button>
             <div class="menu-sep"></div>
             <div class="swatches">

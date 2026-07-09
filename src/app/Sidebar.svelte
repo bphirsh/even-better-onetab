@@ -31,8 +31,7 @@
 
 <aside>
   <div class="brand">
-    <img src="/icons/icon_48.png" alt="" width="26" height="26" />
-    <span>Better OneTab</span>
+    <img class="wordmark" src="/icons/wordmark.png" alt="Even Better OneTab" />
   </div>
 
   <nav>
@@ -85,16 +84,27 @@
     top: 0;
     height: 100vh;
     overflow-y: auto;
+    /* sticky isolates blending; the wordmark's mix-blend-mode needs a backdrop inside this context */
+    background: var(--bg);
   }
 
   .brand {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 4px 10px 16px;
-    font-size: 15px;
-    font-weight: 650;
-    letter-spacing: -0.01em;
+    padding: 4px 6px 14px;
+  }
+
+  .wordmark {
+    width: 168px;
+    height: auto;
+    /* the wordmark PNG sits on a white field; multiply blends it into the light theme */
+    mix-blend-mode: multiply;
+  }
+
+  :global([data-theme='dark']) .wordmark {
+    /* invert for dark, hue-rotate restores the blues, screen drops the (now black) field */
+    filter: invert(1) hue-rotate(180deg);
+    mix-blend-mode: screen;
   }
 
   nav {

@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { TabItem } from '../core/types'
   import type { Options } from '../core/options'
+  import { GROUP_COLORS } from '../ui/colors'
   import Icon from '../ui/Icon.svelte'
 
   let {
@@ -37,6 +38,15 @@
     {:else}
       <span class="favicon fallback">{letter}</span>
     {/if}
+  {/if}
+
+  {#if tab.group}
+    <span
+      class="group"
+      class:unnamed={!tab.group.title}
+      style:--gc={GROUP_COLORS[tab.group.color] ?? GROUP_COLORS.grey}
+      title={`Tab group: ${tab.group.title || 'unnamed'}`}
+    >{tab.group.title}</span>
   {/if}
 
   {#if display === 'url'}
@@ -127,6 +137,28 @@
     display: inline-flex;
     color: var(--text-3);
     flex-shrink: 0;
+  }
+
+  .group {
+    flex-shrink: 0;
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--gc) 18%, transparent);
+    color: var(--gc);
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+
+  .group.unnamed {
+    width: 9px;
+    height: 9px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--gc);
   }
 
   .remove {

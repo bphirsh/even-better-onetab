@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Better OneTab",
+  "name": "Even Better OneTab",
   "version": "2.0.0",
   "description": "Store and restore your tabs in one click — a cleaner, faster OneTab alternative.",
   "icons": {
@@ -31,6 +31,6 @@
     "restore-latest-list": { "description": "Restore the most recent list" },
     "open-lists": { "description": "Open the tab list page" }
   },
-  "permissions": ["contextMenus", "storage", "tabs", "history", "alarms"],
+  "permissions": ["contextMenus", "storage", "tabs", "tabGroups", "history", "alarms"],
   "homepage_url": "https://github.com/bphirsh/better-onetab"
 }

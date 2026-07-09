@@ -1,9 +1,22 @@
+export interface TabGroupInfo {
+  title: string
+  /** Chrome tab-group color name ('blue', 'red', ...). */
+  color: string
+}
+
 export interface TabItem {
   url: string
   title: string
   favIconUrl?: string
   pinned?: boolean
   muted?: boolean
+  group?: TabGroupInfo
+}
+
+/** Records a deleted list id so deletions propagate through sync instead of resurrecting. */
+export interface Tombstone {
+  id: string
+  deletedAt: number
 }
 
 export interface TabList {
@@ -23,6 +36,7 @@ export interface Snapshot {
   format: 'better-onetab/2'
   exportedAt: number
   lists: TabList[]
+  tombstones?: Tombstone[]
 }
 
 export interface SyncConfig {

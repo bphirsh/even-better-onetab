@@ -1,5 +1,5 @@
 import { createNewTabList, normalizeList } from '../core/lists'
-import { getLists, getOptions, setLists } from '../core/storage'
+import { addTombstones, getLists, getOptions, setLists } from '../core/storage'
 import type { TabList } from '../core/types'
 import { schedulePush } from './sync'
 
@@ -21,15 +21,19 @@ const touch = (list: TabList) => {
 export const mutateLists = (fn: (lists: TabList[]) => TabList[] | void, sync = true) =>
   enqueue(async () => {
     const lists = await getLists()
+    const beforeIds = new Set(lists.map(l => l._id))
     const result = fn(lists) ?? lists
+    // Tombstone anything that disappeared so sync propagates the deletion.
+    for (const list of result) beforeIds.delete(list._id)
+    if (beforeIds.size > 0) await addTombstones([...beforeIds])
     await setLists(result)
     if (sync) schedulePush()
   })
 
-export const addList = (partial: Partial<TabList>) => {
+export const addList = (partial: Partial<TabList>, index?: number) => {
   const list = createNewTabList(partial)
   return mutateLists(lists => {
-    lists.unshift(list)
+    lists.splice(Math.max(0, Math.min(index ?? 0, lists.length)), 0, list)
   }).then(() => list)
 }
 

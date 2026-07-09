@@ -1,6 +1,6 @@
 import { isStorableUrl, normalizeTab } from '../core/lists'
 import { getLists, getOptions } from '../core/storage'
-import type { TabItem, TabList } from '../core/types'
+import type { TabGroupInfo, TabItem, TabList } from '../core/types'
 import { appendTabsToList, removeList } from './mutations'
 
 const APP_URL = chrome.runtime.getURL('app.html')
@@ -51,13 +51,30 @@ export const groupTabsInCurrentWindow = async () => {
   return { ...result, twoSide: result.left.concat(result.right) }
 }
 
-const toTabItem = (tab: chrome.tabs.Tab): TabItem =>
+/** Looks up group title/color for every group the given tabs belong to. */
+const getGroupInfoMap = async (tabs: chrome.tabs.Tab[]): Promise<Map<number, TabGroupInfo>> => {
+  const map = new Map<number, TabGroupInfo>()
+  if (!chrome.tabGroups) return map
+  const groupIds = [...new Set(tabs.map(t => t.groupId).filter(id => id != null && id >= 0))]
+  for (const id of groupIds) {
+    try {
+      const group = await chrome.tabGroups.get(id)
+      map.set(id, { title: group.title ?? '', color: group.color })
+    } catch {
+      // group vanished mid-operation
+    }
+  }
+  return map
+}
+
+const toTabItem = (tab: chrome.tabs.Tab, groups?: Map<number, TabGroupInfo>): TabItem =>
   normalizeTab({
     url: tab.url ?? '',
     title: tab.title ?? '',
     favIconUrl: tab.favIconUrl,
     pinned: tab.pinned,
     muted: tab.mutedInfo?.muted,
+    group: tab.groupId != null && tab.groupId >= 0 ? groups?.get(tab.groupId) : undefined,
   })
 
 export const storeTabs = async (tabs: chrome.tabs.Tab[], listId?: string) => {
@@ -66,7 +83,8 @@ export const storeTabs = async (tabs: chrome.tabs.Tab[], listId?: string) => {
   if (opts.ignorePinned) storable = storable.filter(t => !t.pinned)
   if (opts.excludeIllegalURL) storable = storable.filter(t => isStorableUrl(t.url!))
   if (storable.length === 0) return
-  await appendTabsToList(listId, storable.map(toTabItem))
+  const groups = await getGroupInfoMap(storable)
+  await appendTabsToList(listId, storable.map(t => toTabItem(t, groups)))
   if (opts.addHistory) {
     for (const tab of storable) {
       try {
@@ -107,6 +125,37 @@ export const storeLeftTabs = async (listId?: string) => storeTabs((await groupTa
 export const storeRightTabs = async (listId?: string) => storeTabs((await groupTabsInCurrentWindow()).right, listId)
 export const storeTwoSideTabs = async (listId?: string) => storeTabs((await groupTabsInCurrentWindow()).twoSide, listId)
 
+/** Re-creates tab groups: consecutive restored tabs with the same stored group get grouped. */
+const regroupTabs = async (created: { id: number; group?: TabGroupInfo }[]) => {
+  if (!chrome.tabGroups) return
+  let cluster: number[] = []
+  let current: TabGroupInfo | undefined
+  const flush = async () => {
+    if (current && cluster.length > 0) {
+      try {
+        const groupId = await chrome.tabs.group({ tabIds: cluster })
+        await chrome.tabGroups.update(groupId, {
+          title: current.title,
+          color: current.color as chrome.tabGroups.ColorEnum,
+        })
+      } catch {
+        // grouping is best-effort (e.g. tab already closed again)
+      }
+    }
+    cluster = []
+  }
+  for (const tab of created) {
+    const sameGroup =
+      tab.group && current && tab.group.title === current.title && tab.group.color === current.color
+    if (!sameGroup) {
+      await flush()
+      current = tab.group
+    }
+    if (tab.group) cluster.push(tab.id)
+  }
+  await flush()
+}
+
 export const restoreTabs = async (tabs: TabItem[], windowId?: number) => {
   const opts = await getOptions()
   let indexOffset = 0
@@ -114,26 +163,33 @@ export const restoreTabs = async (tabs: TabItem[], windowId?: number) => {
     const existing = windowId != null ? await getAllInWindow(windowId) : await getAllTabsInCurrentWindow()
     indexOffset = (existing.at(-1)?.index ?? -1) + 1
   }
+  const created: { id: number; group?: TabGroupInfo }[] = []
   for (let i = 0; i < tabs.length; i += 1) {
     const tab = tabs[i]
-    const created = await chrome.tabs.create({
+    const createdTab = await chrome.tabs.create({
       url: tab.url,
       pinned: tab.pinned,
       index: i + indexOffset,
       windowId,
     })
-    if (tab.muted) await chrome.tabs.update(created.id!, { muted: true })
+    if (tab.muted) await chrome.tabs.update(createdTab.id!, { muted: true })
+    created.push({ id: createdTab.id!, group: tab.group })
   }
+  await regroupTabs(created)
 }
 
 export const restoreList = async (list: TabList, { windowId, newWindow = false }: { windowId?: number; newWindow?: boolean } = {}) => {
   if (newWindow) {
     const created = await chrome.windows.create({ url: list.tabs.map(t => t.url) })
+    const createdTabs: { id: number; group?: TabGroupInfo }[] = []
     list.tabs.forEach((tab, index) => {
       const target = created.tabs?.[index]
-      if (tab.muted && target) chrome.tabs.update(target.id!, { muted: true })
-      if (tab.pinned && target) chrome.tabs.update(target.id!, { pinned: true })
+      if (!target) return
+      if (tab.muted) chrome.tabs.update(target.id!, { muted: true })
+      if (tab.pinned) chrome.tabs.update(target.id!, { pinned: true })
+      createdTabs.push({ id: target.id!, group: tab.group })
     })
+    await regroupTabs(createdTabs)
     return
   }
   await restoreTabs(list.tabs, windowId)

@@ -20,3 +20,16 @@ export const LIST_COLORS: Record<string, string> = {
 export const COLOR_NAMES = ['', ...Object.keys(LIST_COLORS)]
 
 export const colorOf = (name: string): string | null => LIST_COLORS[name] ?? null
+
+/** Chrome tab-group color names → display hex. */
+export const GROUP_COLORS: Record<string, string> = {
+  grey: '#8f959e',
+  blue: '#4d9ee6',
+  red: '#e5695e',
+  yellow: '#d9a514',
+  green: '#58b968',
+  pink: '#dd66a2',
+  purple: '#9a6ee8',
+  cyan: '#3fb9cf',
+  orange: '#e08c3c',
+}

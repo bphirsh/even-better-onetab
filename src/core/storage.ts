@@ -1,12 +1,15 @@
 import { normalizeList, validateList } from './lists'
 import { DEFAULT_OPTIONS, type Options } from './options'
-import type { SyncConfig, SyncState, TabList } from './types'
+import type { SyncConfig, SyncState, TabList, Tombstone } from './types'
 
 // Storage keys are kept identical to v1 so existing user data survives the upgrade.
 const LISTS_KEY = 'lists'
 const OPTS_KEY = 'opts'
 const SYNC_CONFIG_KEY = 'syncConfig'
 const SYNC_STATE_KEY = 'syncState'
+const TOMBSTONES_KEY = 'syncTombstones'
+
+const TOMBSTONE_TTL = 30 * 86_400_000
 
 export const getLists = async (): Promise<TabList[]> => {
   const { [LISTS_KEY]: lists } = await chrome.storage.local.get(LISTS_KEY)
@@ -56,4 +59,24 @@ export const setSyncState = async (state: Partial<SyncState>) => {
   await chrome.storage.local.set({ [SYNC_STATE_KEY]: { ...current, ...state } })
 }
 
-export const STORAGE_KEYS = { LISTS_KEY, OPTS_KEY, SYNC_CONFIG_KEY, SYNC_STATE_KEY }
+export const getTombstones = async (): Promise<Tombstone[]> => {
+  const { [TOMBSTONES_KEY]: tombstones } = await chrome.storage.local.get(TOMBSTONES_KEY)
+  const now = Date.now()
+  return Array.isArray(tombstones) ? tombstones.filter(t => now - t.deletedAt < TOMBSTONE_TTL) : []
+}
+
+export const setTombstones = async (tombstones: Tombstone[]) => {
+  const now = Date.now()
+  await chrome.storage.local.set({
+    [TOMBSTONES_KEY]: tombstones.filter(t => now - t.deletedAt < TOMBSTONE_TTL),
+  })
+}
+
+export const addTombstones = async (ids: string[]) => {
+  if (ids.length === 0) return
+  const now = Date.now()
+  const kept = (await getTombstones()).filter(t => !ids.includes(t.id))
+  await setTombstones([...kept, ...ids.map(id => ({ id, deletedAt: now }))])
+}
+
+export const STORAGE_KEYS = { LISTS_KEY, OPTS_KEY, SYNC_CONFIG_KEY, SYNC_STATE_KEY, TOMBSTONES_KEY }

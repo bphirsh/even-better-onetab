@@ -63,7 +63,7 @@
 
   <button class="footer" onclick={openLists}>
     <Icon name="layers" size={15} />
-    <span>Open Better OneTab</span>
+    <span>Open Even Better OneTab</span>
   </button>
 </main>
 
