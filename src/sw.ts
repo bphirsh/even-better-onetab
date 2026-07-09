@@ -14,16 +14,33 @@ import {
   storeTwoSideTabs,
 } from './background/tabs'
 import type { Message } from './core/messages'
-import { getLists } from './core/storage'
+import { getLists, getOptions } from './core/storage'
+
+/**
+ * With a popup set, clicks open it and never reach onClicked — so for the
+ * other browserAction modes the popup is cleared and we handle the click here.
+ */
+const applyBrowserAction = async () => {
+  const opts = await getOptions()
+  await chrome.action.setPopup({ popup: opts.browserAction === 'popup' ? 'popup.html' : '' })
+}
+
+chrome.action.onClicked.addListener(async () => {
+  const opts = await getOptions()
+  if (opts.browserAction === 'store-selected') storeSelectedTabs()
+  else if (opts.browserAction === 'store-all') storeAllTabs()
+  else openTabLists()
+})
 
 chrome.runtime.onInstalled.addListener(details => {
   if (details.reason === 'install' || details.reason === 'update') {
-    migrateFromV1().then(rebuildMenus)
+    migrateFromV1().then(rebuildMenus).then(applyBrowserAction)
   }
 })
 
 chrome.runtime.onStartup.addListener(() => {
   rebuildMenus()
+  applyBrowserAction()
 })
 
 chrome.contextMenus.onClicked.addListener(info => {
@@ -54,6 +71,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
     clearTimeout(menuRebuildTimer)
     menuRebuildTimer = setTimeout(rebuildMenus, 2000)
   }
+  if (changes.opts) applyBrowserAction()
 })
 
 const storeHandlers = {

@@ -1,4 +1,4 @@
-import { DEFAULT_OPTIONS, type Options } from '../core/options'
+import { BROWSER_ACTIONS, DEFAULT_OPTIONS, type Options } from '../core/options'
 import { getLists, setOptions } from '../core/storage'
 import { replaceLists } from './mutations'
 
@@ -18,6 +18,8 @@ export const migrateFromV1 = async () => {
       }
     }
     if (old.defaultNightMode === true) migrated.theme = 'dark'
+    // v1 also had browserAction: 'none', which has no MV3 equivalent
+    if (!BROWSER_ACTIONS.includes(migrated.browserAction)) migrated.browserAction = 'popup'
     await setOptions(migrated)
   }
 

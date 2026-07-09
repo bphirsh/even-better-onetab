@@ -1,5 +1,10 @@
+export const BROWSER_ACTIONS = ['popup', 'store-selected', 'store-all', 'show-list'] as const
+export type BrowserAction = (typeof BROWSER_ACTIONS)[number]
+
 export interface Options {
   theme: 'auto' | 'light' | 'dark'
+  /** What clicking the toolbar button does. Anything but 'popup' clears the popup so the click reaches the service worker. */
+  browserAction: BrowserAction
   /** What clicking a stored tab in the list page does. */
   itemClickAction: 'open-and-remove' | 'open' | 'none'
   itemDisplay: 'title-and-url' | 'title' | 'url'
@@ -28,6 +33,7 @@ export interface Options {
 
 export const DEFAULT_OPTIONS: Options = {
   theme: 'auto',
+  browserAction: 'popup',
   itemClickAction: 'open-and-remove',
   itemDisplay: 'title-and-url',
   hideFavicon: false,

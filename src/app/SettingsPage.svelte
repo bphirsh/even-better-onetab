@@ -76,6 +76,28 @@
     <div class="card">
       <div class="row">
         <div class="text">
+          <div class="label">Clicking the toolbar button</div>
+          <div class="desc">
+            {#if app.opts.browserAction !== 'popup'}
+              Without the popup, recent lists are reachable from the list page and right-click menu.
+            {:else}
+              The popup has store buttons and your recent lists.
+            {/if}
+          </div>
+        </div>
+        <select
+          class="select"
+          value={app.opts.browserAction}
+          onchange={e => update('browserAction', e.currentTarget.value as Options['browserAction'])}
+        >
+          <option value="popup">Opens the popup</option>
+          <option value="store-selected">Stores the selected tabs</option>
+          <option value="store-all">Stores all tabs</option>
+          <option value="show-list">Opens the list page</option>
+        </select>
+      </div>
+      <div class="row">
+        <div class="text">
           <div class="label">Clicking a stored tab</div>
         </div>
         <select
