@@ -39,7 +39,7 @@ export const rebuildMenus = async () => {
     if (opts.allContext) contexts.push('all')
   }
 
-  await create({ id: 'SHOW_TAB_LIST', title: 'Show stored tabs', contexts })
+  await create({ id: 'SHOW_TAB_LIST', title: 'Open Even Better OneTab', contexts })
   await create({ id: 'STORE_SELECTED', title: 'Store selected tabs', contexts })
   await create({ id: 'STORE', title: 'Store tabs…', contexts })
   await create({ id: 'STORE.STORE_ALL', parentId: 'STORE', title: 'All tabs in this window', contexts })

@@ -20,7 +20,6 @@
     { key: 'removeDuplicate', label: 'Remove duplicate tabs within a list' },
     { key: 'addHistory', label: 'Keep stored tabs in browser history', desc: 'Stored tabs stay findable from the address bar.' },
     { key: 'pinNewList', label: 'Pin new lists' },
-    { key: 'openTabListNoTab', label: 'Open the list page after storing all tabs', desc: 'So the window isn’t left empty.' },
   ]
 
   const menuToggles: ToggleDef[] = [
@@ -85,6 +84,28 @@
   <section>
     <h2>Storing tabs</h2>
     <div class="card">
+      <div class="row">
+        <div class="text">
+          <div class="label">Storing opens the list page</div>
+          <div class="desc">
+            {#if app.opts.openListPage === 'never'}
+              Storing all tabs leaves a new-tab page so the window isn’t left empty.
+            {:else}
+              So you land on your stored tabs instead of an empty window.
+            {/if}
+          </div>
+        </div>
+        <select
+          class="select"
+          value={app.opts.openListPage}
+          onchange={e => update('openListPage', e.currentTarget.value as Options['openListPage'])}
+        >
+          <option value="all-stored">When all tabs are stored</option>
+          <option value="always">Whenever tabs are stored</option>
+          <option value="if-absent">When the window doesn’t have it</option>
+          <option value="never">Never</option>
+        </select>
+      </div>
       {#each storingToggles as t (t.key)}
         <label class="row">
           <div class="text">
@@ -196,6 +217,11 @@
 
   <SyncSection />
   <ImportExport />
+
+  <p class="support">
+    Enjoying Even Better OneTab?
+    <a href="https://github.com/sponsors/bphirsh" target="_blank" rel="noreferrer">Sponsor the project</a> ☕
+  </p>
 </div>
 
 <style>
@@ -263,6 +289,13 @@
     padding: 12px 0;
     font-size: 12.5px;
     color: var(--text-2);
+  }
+
+  .support {
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--text-3);
+    margin: 4px 0 0;
   }
 
   code {

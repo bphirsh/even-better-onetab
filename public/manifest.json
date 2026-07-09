@@ -31,6 +31,5 @@
     "restore-latest-list": { "description": "Restore the most recent list" },
     "open-lists": { "description": "Open the tab list page" }
   },
-  "permissions": ["contextMenus", "storage", "tabs", "tabGroups", "history", "alarms"],
-  "homepage_url": "https://github.com/bphirsh/even-better-onetab"
+  "permissions": ["contextMenus", "storage", "tabs", "tabGroups", "history", "alarms"]
 }

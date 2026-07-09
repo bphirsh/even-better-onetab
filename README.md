@@ -1,7 +1,10 @@
 # Even Better OneTab
 
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-db61a2?logo=github)](https://github.com/sponsors/bphirsh)
+
 Store and restore your browser tabs in one click — a cleaner, faster OneTab alternative for
-Chrome and Brave.
+Chrome and Brave. If it's useful to you, consider
+[sponsoring the project](https://github.com/sponsors/bphirsh) ☕.
 
 This is a fork of [cnwangjie/better-onetab](https://github.com/cnwangjie/better-onetab)
 (unmaintained since ~2020), rebuilt from the ground up and modernized. The original was

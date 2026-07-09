@@ -29,8 +29,12 @@ export interface Options {
   removeDuplicate: boolean
   /** Where restored tabs open. */
   restorePosition: 'end' | 'start' | 'new-window'
-  /** Open the list page after storing all tabs (so the window isn't left empty). */
-  openTabListNoTab: boolean
+  /**
+   * When storing opens the list page: only when every tab is stored, on every
+   * store, only when the window doesn't already show it, or never (storing all
+   * tabs then leaves a new-tab page so the window survives).
+   */
+  openListPage: 'all-stored' | 'always' | 'if-absent' | 'never'
 }
 
 export const DEFAULT_OPTIONS: Options = {
@@ -49,5 +53,5 @@ export const DEFAULT_OPTIONS: Options = {
   excludeIllegalURL: true,
   removeDuplicate: false,
   restorePosition: 'end',
-  openTabListNoTab: true,
+  openListPage: 'all-stored',
 }

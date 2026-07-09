@@ -19,6 +19,7 @@ export const migrateFromV1 = async () => {
     }
     if (old.defaultNightMode === true) migrated.theme = 'dark'
     if (typeof old.openEnd === 'boolean') migrated.restorePosition = old.openEnd ? 'end' : 'start'
+    if (typeof old.openTabListNoTab === 'boolean') migrated.openListPage = old.openTabListNoTab ? 'all-stored' : 'never'
     // v1 also had browserAction: 'none' and itemClickAction: 'none'; neither survives
     if (!BROWSER_ACTIONS.includes(migrated.browserAction)) migrated.browserAction = 'popup'
     if (migrated.itemClickAction !== 'open-and-remove' && migrated.itemClickAction !== 'open') {

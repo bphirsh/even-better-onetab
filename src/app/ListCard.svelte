@@ -205,6 +205,9 @@
 
     <div class="actions">
       <button class="open-btn" title="Open all tabs in this list" onclick={() => restore()}>Open</button>
+      <button class="icon-btn" title="Archive list" aria-label="Archive list" onclick={archiveList}>
+        <Icon name="archive" size={15} />
+      </button>
       <div class="dropdown" bind:this={menuEl}>
         <button class="icon-btn" title="More" onclick={() => (menuOpen = !menuOpen)}>
           <Icon name="more" size={15} />

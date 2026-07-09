@@ -97,33 +97,61 @@ export const storeTabs = async (tabs: chrome.tabs.Tab[], listId?: string) => {
   await chrome.tabs.remove(storable.map(t => t.id!))
 }
 
+/**
+ * Applies the openListPage option before tabs close. With 'never' and a
+ * store-everything operation, a fresh new-tab page keeps the window alive.
+ */
+const maybeOpenListPage = async (storingAll: boolean) => {
+  const opts = await getOptions()
+  switch (opts.openListPage) {
+    case 'always':
+      return openTabLists()
+    case 'all-stored':
+      if (storingAll) return openTabLists()
+      return
+    case 'if-absent': {
+      const win = await getFocusedWindow()
+      const tabs = await getAllInWindow(win.id!)
+      if (!tabs.some(t => t.url?.startsWith(APP_URL))) return openTabLists()
+      return
+    }
+    case 'never':
+      if (storingAll) await chrome.tabs.create({})
+      return
+  }
+}
+
 export const storeSelectedTabs = async (listId?: string) => {
   const tabs = await getSelectedTabs()
   const allTabs = await getAllTabsInCurrentWindow()
-  if (tabs.length === allTabs.length) await openTabLists()
+  await maybeOpenListPage(tabs.length === allTabs.length)
   return storeTabs(tabs, listId)
 }
 
 export const storeAllTabs = async (listId?: string) => {
   const tabs = await getAllTabsInCurrentWindow()
-  const opts = await getOptions()
-  if (opts.openTabListNoTab) await openTabLists()
+  await maybeOpenListPage(true)
   return storeTabs(tabs, listId)
 }
 
 export const storeAllTabsInAllWindows = async () => {
   const windows = await chrome.windows.getAll()
-  const opts = await getOptions()
-  if (opts.openTabListNoTab) await openTabLists()
+  await maybeOpenListPage(true)
   for (const win of windows) {
     const tabs = await getAllInWindow(win.id!)
     await storeTabs(tabs)
   }
 }
 
-export const storeLeftTabs = async (listId?: string) => storeTabs((await groupTabsInCurrentWindow()).left, listId)
-export const storeRightTabs = async (listId?: string) => storeTabs((await groupTabsInCurrentWindow()).right, listId)
-export const storeTwoSideTabs = async (listId?: string) => storeTabs((await groupTabsInCurrentWindow()).twoSide, listId)
+const storeGrouped = async (which: 'left' | 'right' | 'twoSide', listId?: string) => {
+  const groups = await groupTabsInCurrentWindow()
+  await maybeOpenListPage(false)
+  return storeTabs(groups[which], listId)
+}
+
+export const storeLeftTabs = (listId?: string) => storeGrouped('left', listId)
+export const storeRightTabs = (listId?: string) => storeGrouped('right', listId)
+export const storeTwoSideTabs = (listId?: string) => storeGrouped('twoSide', listId)
 
 /** Re-creates tab groups: consecutive restored tabs with the same stored group get grouped. */
 const regroupTabs = async (created: { id: number; group?: TabGroupInfo }[]) => {
