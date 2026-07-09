@@ -55,9 +55,13 @@ the `dist/` folder.
 
 ## Mobile viewer
 
-`viewer/index.html` is a self-contained page — host it anywhere static (GitHub Pages, Netlify,
-or just open the file) and enter the same token + gist id once. It stores them in the browser's
-local storage and shows a read-only, phone-friendly view of your lists.
+A read-only, phone-friendly view of your synced lists, hosted at
+**<https://bphirsh.github.io/even-better-onetab/viewer/>** (GitHub Pages, straight from this
+repo). Open it on your phone and enter the same token + gist id once — they're stored only in
+that browser's local storage.
+
+`viewer/index.html` is fully self-contained, so you can also host it anywhere else static or
+just open the file directly.
 
 ## Development
 

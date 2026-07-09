@@ -120,9 +120,10 @@
         <div class="text">
           <div class="label">Mobile viewer</div>
           <div class="desc">
-            Open the viewer page on your phone, paste the same token and gist id
-            (<code>{app.syncConfig.gistId}</code>), and your lists are readable anywhere. See the
-            <a href="https://github.com/bphirsh/even-better-onetab#mobile-viewer" target="_blank" rel="noreferrer">setup guide</a>.
+            Open
+            <a href="https://bphirsh.github.io/even-better-onetab/viewer/" target="_blank" rel="noreferrer">the viewer page</a>
+            on your phone and paste the same token and gist id
+            (<code>{app.syncConfig.gistId}</code>) once — your lists are readable anywhere.
           </div>
         </div>
         <span class="phone-icon"><Icon name="phone" size={18} /></span>
