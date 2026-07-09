@@ -52,8 +52,10 @@
           {#if list.title}
             <span class="recent-count">{list.tabs.length}</span>
           {/if}
-          <span class="recent-time">{timeAgo(list.time)}</span>
-          <span class="restore-icon"><Icon name="restore" size={14} /></span>
+          <span class="slot">
+            <span class="recent-time">{timeAgo(list.time)}</span>
+            <span class="restore-icon"><Icon name="restore" size={14} /></span>
+          </span>
         </button>
       {/each}
     </div>
@@ -143,17 +145,30 @@
     color: var(--text-3);
   }
 
+  /* time and restore icon share one grid cell so swapping them on hover can't shift layout */
+  .slot {
+    display: grid;
+    justify-items: end;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .slot > * {
+    grid-area: 1 / 1;
+  }
+
   .restore-icon {
-    display: none;
+    display: inline-flex;
+    visibility: hidden;
     color: var(--accent);
   }
 
   .recent-item:hover .restore-icon {
-    display: inline-flex;
+    visibility: visible;
   }
 
   .recent-item:hover .recent-time {
-    display: none;
+    visibility: hidden;
   }
 
   .empty {

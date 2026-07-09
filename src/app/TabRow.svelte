@@ -162,7 +162,9 @@
   }
 
   .remove {
-    display: none;
+    /* stays in layout while invisible so the row doesn't resize on hover */
+    display: inline-flex;
+    visibility: hidden;
     align-items: center;
     justify-content: center;
     width: 22px;
@@ -173,7 +175,7 @@
   }
 
   .row:hover .remove {
-    display: inline-flex;
+    visibility: visible;
   }
 
   .remove:hover {
