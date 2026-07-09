@@ -14,7 +14,7 @@
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `better-onetab-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `even-better-onetab-backup-${new Date().toISOString().slice(0, 10)}.json`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -45,7 +45,7 @@
         )
       }
     } catch {
-      toast('Could not read that file — is it a Better OneTab backup?', 'error')
+      toast('Could not read that file — is it an Even Better OneTab backup?', 'error')
     }
   }
 </script>
