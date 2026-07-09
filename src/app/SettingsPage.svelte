@@ -216,8 +216,8 @@
   <ImportExport />
 
   <p class="support">
-    Enjoying Even Better OneTab?
-    <a href="https://github.com/sponsors/bphirsh" target="_blank" rel="noreferrer">Sponsor the project</a> ☕
+    Made with ❤️ in NYC<br />
+    <a href="https://github.com/sponsors/bphirsh" target="_blank" rel="noreferrer">☕ Buy me a coffee.</a>
   </p>
 </div>
 
