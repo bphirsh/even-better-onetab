@@ -7,6 +7,7 @@
   import { timeAgo } from '../ui/time'
   import { toast } from '../ui/toast.svelte'
   import { act } from './actions'
+  import { startAutoScroll, stopAutoScroll } from './dnd-autoscroll'
   import TabRow from './TabRow.svelte'
 
   let {
@@ -30,12 +31,14 @@
 
   const onConsider = (e: CustomEvent<DndEvent<TabDndItem>>) => {
     draggingTabs = true
+    startAutoScroll()
     tabItems = e.detail.items
   }
 
   const onFinalize = (e: CustomEvent<DndEvent<TabDndItem>>) => {
     tabItems = e.detail.items
     draggingTabs = false
+    stopAutoScroll()
     act({ type: 'list-update', id: list._id, patch: { tabs: tabItems.map(i => i.tab) } })
   }
 

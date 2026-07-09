@@ -4,6 +4,7 @@
   import Icon from '../ui/Icon.svelte'
   import { app } from '../ui/state.svelte'
   import { act } from './actions'
+  import { startAutoScroll, stopAutoScroll } from './dnd-autoscroll'
   import { filters, filtersActive } from './filters.svelte'
   import ListCard from './ListCard.svelte'
 
@@ -38,12 +39,14 @@
 
   const onConsider = (e: CustomEvent<DndEvent<ListItem>>) => {
     dragging = true
+    startAutoScroll()
     dndItems = e.detail.items
   }
 
   const onFinalize = (e: CustomEvent<DndEvent<ListItem>>) => {
     dndItems = e.detail.items
     dragging = false
+    stopAutoScroll()
     dragDisabled = true
     const id = String(e.detail.info.id)
     const toIndex = dndItems.findIndex(i => i.id === id)
