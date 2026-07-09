@@ -42,6 +42,11 @@
     if (!confirm('Disconnect sync? The gist itself is not deleted.')) return
     setSyncConfig({ enabled: false, gistToken: '', gistId: '' })
   }
+
+  const copy = async (label: string, value: string) => {
+    await navigator.clipboard.writeText(value)
+    toast(`${label} copied`)
+  }
 </script>
 
 <section>
@@ -122,11 +127,25 @@
           <div class="desc">
             Open
             <a href="https://bphirsh.github.io/even-better-onetab/viewer/" target="_blank" rel="noreferrer">the viewer page</a>
-            on your phone and paste the same token and gist id
-            (<code>{app.syncConfig.gistId}</code>) once — your lists are readable anywhere.
+            on your phone and paste your token and gist id once — your lists are readable anywhere.
           </div>
         </div>
         <span class="phone-icon"><Icon name="phone" size={18} /></span>
+      </div>
+
+      <div class="row">
+        <div class="text">
+          <div class="label">Viewer credentials</div>
+          <div class="desc">Copy these to enter into the viewer on your phone.</div>
+        </div>
+        <div class="btn-group">
+          <button class="btn" onclick={() => copy('Token', app.syncConfig.gistToken)}>
+            <Icon name="copy" size={13} /> Token
+          </button>
+          <button class="btn" onclick={() => copy('Gist id', app.syncConfig.gistId)}>
+            <Icon name="copy" size={13} /> Gist id
+          </button>
+        </div>
       </div>
 
       <div class="row">

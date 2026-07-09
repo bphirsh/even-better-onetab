@@ -47,6 +47,14 @@
     background: var(--accent); color: #fff; font: inherit; font-weight: 600; cursor: pointer;
   }
   .muted { color: var(--text-2); font-size: 13px; }
+  .help { margin: 10px 0 4px; font-size: 13.5px; color: var(--text-2); }
+  .help summary {
+    cursor: pointer; color: var(--accent); font-weight: 600; font-size: 13.5px;
+    -webkit-tap-highlight-color: transparent; list-style-position: inside;
+  }
+  .help ol { margin: 10px 0 6px; padding-left: 22px; }
+  .help li { margin: 6px 0; }
+  .help p { margin: 8px 0 2px; }
   .error { color: var(--danger); font-size: 13.5px; margin-top: 10px; }
   .search-row { margin-bottom: 12px; }
   .list-card { padding: 4px 6px; }
@@ -95,9 +103,17 @@
 
   <div class="card" id="setup" hidden>
     <p class="muted" style="margin-top:0">
-      Read-only viewer for your synced tab lists. Enter the same GitHub token and gist id used by
-      the extension (Settings → Sync &amp; mobile). They are stored only on this device.
+      Read-only viewer for your synced tab lists.
     </p>
+    <details class="help">
+      <summary>How do I set this up?</summary>
+      <ol>
+        <li>In the extension on your computer, open <b>Settings → Sync &amp; mobile</b> and connect sync (one-time).</li>
+        <li>Use the <b>Token</b> and <b>Gist id</b> copy buttons there and get them onto this device — e.g. paste into a note or a message to yourself.</li>
+        <li>Enter them below. They're stored only in this browser, never sent anywhere except to GitHub itself.</li>
+      </ol>
+      <p>Tip: use your browser's <b>Add to Home Screen</b> on this page to make it feel like an app.</p>
+    </details>
     <label for="token">GitHub token</label>
     <input type="password" id="token" placeholder="ghp_… or github_pat_…" autocomplete="off" />
     <label for="gist">Gist id</label>
