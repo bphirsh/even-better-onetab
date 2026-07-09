@@ -1,6 +1,6 @@
-import { normalizeList, validateList } from './lists'
+import { genId, normalizeList, validateList } from './lists'
 import { DEFAULT_OPTIONS, type Options } from './options'
-import type { SyncConfig, SyncState, TabList, Tombstone, TrashEntry } from './types'
+import type { SyncConfig, SyncState, TabItem, TabList, Tombstone, TrashEntry, TrashTabEntry } from './types'
 
 // Storage keys are kept identical to v1 so existing user data survives the upgrade.
 const LISTS_KEY = 'lists'
@@ -9,6 +9,7 @@ const SYNC_CONFIG_KEY = 'syncConfig'
 const SYNC_STATE_KEY = 'syncState'
 const TOMBSTONES_KEY = 'syncTombstones'
 const TRASH_KEY = 'trash'
+const TAB_TRASH_KEY = 'tabTrash'
 
 const TOMBSTONE_TTL = 30 * 86_400_000
 const TRASH_MAX_ENTRIES = 50
@@ -116,4 +117,24 @@ export const addToTrash = async (lists: TabList[]) => {
   await setTrash([...lists.map(list => ({ list, deletedAt: now })), ...existing])
 }
 
-export const STORAGE_KEYS = { LISTS_KEY, OPTS_KEY, SYNC_CONFIG_KEY, SYNC_STATE_KEY, TOMBSTONES_KEY, TRASH_KEY }
+export const getTabTrash = async (): Promise<TrashTabEntry[]> => {
+  const { [TAB_TRASH_KEY]: trash } = await chrome.storage.local.get(TAB_TRASH_KEY)
+  const ttl = await getTrashTtl()
+  const now = Date.now()
+  return Array.isArray(trash) ? trash.filter(t => now - t.deletedAt < ttl) : []
+}
+
+export const setTabTrash = async (trash: TrashTabEntry[]) => {
+  await chrome.storage.local.set({ [TAB_TRASH_KEY]: trash.slice(0, TRASH_MAX_ENTRIES) })
+}
+
+export const addToTabTrash = async (removed: { tab: TabItem; listId: string; listTitle: string }[]) => {
+  if (removed.length === 0) return
+  if ((await getTrashTtl()) === 0) return
+  const now = Date.now()
+  const existing = await getTabTrash()
+  const entries = removed.map(r => ({ id: genId(), ...r, deletedAt: now }))
+  await setTabTrash([...entries, ...existing])
+}
+
+export const STORAGE_KEYS = { LISTS_KEY, OPTS_KEY, SYNC_CONFIG_KEY, SYNC_STATE_KEY, TOMBSTONES_KEY, TRASH_KEY, TAB_TRASH_KEY }

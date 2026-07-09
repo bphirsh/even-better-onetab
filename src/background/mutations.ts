@@ -1,15 +1,18 @@
 import { createNewTabList, normalizeList } from '../core/lists'
 import {
+  addToTabTrash,
   addToTrash,
   addTombstones,
   getLists,
   getOptions,
+  getTabTrash,
   getTrash,
   removeTombstones,
   setLists,
+  setTabTrash,
   setTrash,
 } from '../core/storage'
-import type { TabList } from '../core/types'
+import type { TabItem, TabList } from '../core/types'
 import { schedulePush } from './sync'
 
 // All list writes are funneled through this queue so concurrent messages from
@@ -60,6 +63,42 @@ export const restoreFromTrash = async (listId: string) => {
   if (!entry) throw new Error('That list is no longer in history')
   await setTrash(trash.filter(t => t.list._id !== listId))
   return addList({ ...entry.list, updatedAt: Date.now() })
+}
+
+/** Explicit single-tab deletion; the removed tab goes to the tab trash for History. */
+export const removeTabFromList = async (listId: string, index: number, url: string) => {
+  let removed: TabItem | undefined
+  let listTitle = ''
+  await mutateLists(lists => {
+    const list = lists.find(l => l._id === listId)
+    if (!list) return
+    let i = list.tabs[index]?.url === url ? index : list.tabs.findIndex(t => t.url === url)
+    if (i < 0) return
+    // deleting the last tab deletes the list — trash it whole (tab included)
+    if (list.tabs.length === 1) return lists.filter(l => l._id !== listId)
+    removed = list.tabs[i]
+    listTitle = list.title
+    list.tabs.splice(i, 1)
+    touch(list)
+  })
+  if (removed) await addToTabTrash([{ tab: removed, listId, listTitle }])
+}
+
+/** Recovers a deleted tab into its original list, or a recreated one if it's gone. */
+export const restoreTabFromTrash = async (entryId: string) => {
+  const trash = await getTabTrash()
+  const entry = trash.find(t => t.id === entryId)
+  if (!entry) throw new Error('That tab is no longer in history')
+  await setTabTrash(trash.filter(t => t.id !== entryId))
+  await mutateLists(lists => {
+    const list = lists.find(l => l._id === entry.listId)
+    if (list) {
+      list.tabs.push(entry.tab)
+      touch(list)
+    } else {
+      lists.unshift(createNewTabList({ tabs: [entry.tab], title: entry.listTitle }))
+    }
+  })
 }
 
 export const updateList = (id: string, patch: Partial<TabList>) =>

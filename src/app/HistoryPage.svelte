@@ -18,6 +18,12 @@
   let expanded = $state<Record<string, boolean>>({})
   const toggle = (key: string) => (expanded[key] = !expanded[key])
 
+  const CAP = 10
+  let showAllLists = $state(false)
+  let showAllTabs = $state(false)
+  const visibleTrash = $derived(showAllLists ? app.trash : app.trash.slice(0, CAP))
+  const visibleTabTrash = $derived(showAllTabs ? app.tabTrash : app.tabTrash.slice(0, CAP))
+
   const label = (list: TabList) => list.title || `${list.tabs.length} tab${list.tabs.length === 1 ? '' : 's'}`
 
   const domain = (url: string) => {
@@ -43,6 +49,11 @@
   const recover = async (id: string) => {
     const { ok } = await act({ type: 'trash-restore', id })
     if (ok) toast('List recovered — it’s back in Lists')
+  }
+
+  const recoverTab = async (id: string) => {
+    const { ok } = await act({ type: 'tab-trash-restore', id })
+    if (ok) toast('Tab recovered — it’s back in its list')
   }
 </script>
 
@@ -106,14 +117,14 @@
   </section>
 
   <section>
-    <h2>Recently deleted</h2>
+    <h2>Recently deleted lists</h2>
     {#if app.opts.trashRetention === 'immediately' && app.trash.length === 0}
       <p class="empty">Deleted lists are removed immediately — change “Deleted lists are” in Settings to keep them recoverable here.</p>
     {:else if app.trash.length === 0}
       <p class="empty">No deleted lists. Deleted lists are {retentionLabel} on this device.</p>
     {:else}
       <div class="card">
-        {#each app.trash as entry (entry.list._id + entry.deletedAt)}
+        {#each visibleTrash as entry (entry.list._id + entry.deletedAt)}
           {@const key = entry.list._id + entry.deletedAt}
           <div class="entry">
             <div
@@ -141,10 +152,48 @@
           </div>
         {/each}
       </div>
+      {#if app.trash.length > CAP && !showAllLists}
+        <button class="see-all" onclick={() => (showAllLists = true)}>See all ({app.trash.length})</button>
+      {/if}
       {#if app.opts.trashRetention === 'immediately'}
         <p class="note">New deletions are removed immediately — these entries disappear when the page reloads.</p>
       {:else}
         <p class="note">Deleted lists are {retentionLabel} on this device, then cleared automatically.</p>
+      {/if}
+    {/if}
+  </section>
+
+  <section>
+    <h2>Recently deleted tabs</h2>
+    {#if app.tabTrash.length === 0}
+      {#if app.opts.trashRetention === 'immediately'}
+        <p class="empty">Deleted tabs are removed immediately — change “Deleted lists are” in Settings to keep them recoverable here.</p>
+      {:else}
+        <p class="empty">No deleted tabs. Tabs removed from a list with ✕ are kept here, {retentionLabel}.</p>
+      {/if}
+    {:else}
+      <div class="card">
+        {#each visibleTabTrash as entry (entry.id)}
+          <div class="entry">
+            <div class="row static">
+              <div class="text">
+                <div class="label">{entry.tab.title || entry.tab.url}</div>
+                <div class="desc">
+                  {domain(entry.tab.url)} · from “{entry.listTitle || 'Untitled'}” · deleted {timeAgo(entry.deletedAt)}
+                </div>
+              </div>
+              <div class="actions">
+                <button class="btn" onclick={() => openTab(entry.tab.url)}>Open</button>
+                <button class="btn" onclick={() => recoverTab(entry.id)}>
+                  <Icon name="restore" size={13} /> Recover
+                </button>
+              </div>
+            </div>
+          </div>
+        {/each}
+      </div>
+      {#if app.tabTrash.length > CAP && !showAllTabs}
+        <button class="see-all" onclick={() => (showAllTabs = true)}>See all ({app.tabTrash.length})</button>
       {/if}
     {/if}
   </section>
@@ -295,6 +344,24 @@
     white-space: nowrap;
     font-size: 12px;
     color: var(--text-3);
+  }
+
+  .row.static {
+    cursor: default;
+  }
+
+  .see-all {
+    display: block;
+    margin: 8px auto 0;
+    padding: 5px 14px;
+    border-radius: var(--radius-sm);
+    color: var(--accent);
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
+  .see-all:hover {
+    background: var(--accent-soft);
   }
 
   .empty,

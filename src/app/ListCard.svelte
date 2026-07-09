@@ -160,8 +160,10 @@
   }
 
   const removeTab = (index: number) => {
-    const tabs = list.tabs.filter((_, i) => i !== index)
-    act({ type: 'list-update', id: list._id, patch: { tabs } })
+    const tab = list.tabs[index]
+    if (!tab) return
+    // explicit deletion goes through the SW so the tab lands in History's tab trash
+    act({ type: 'tab-remove', listId: list._id, index, url: tab.url })
   }
 
   const accent = $derived(colorOf(list.color))

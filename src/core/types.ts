@@ -38,6 +38,16 @@ export interface TrashEntry {
   deletedAt: number
 }
 
+/** A single tab removed from a list, kept locally so it can be recovered from History. */
+export interface TrashTabEntry {
+  id: string
+  tab: TabItem
+  /** The list it came from, so recovery can put it back. */
+  listId: string
+  listTitle: string
+  deletedAt: number
+}
+
 /** The JSON document used for manual export/import and for Gist sync. */
 export interface Snapshot {
   format: 'even-better-onetab/1'

@@ -1,6 +1,15 @@
 import { handleMenuClick, rebuildMenus } from './background/menus'
 import { migrateFromV1 } from './background/migrate'
-import { addList, removeList, reorderList, replaceLists, restoreFromTrash, updateList } from './background/mutations'
+import {
+  addList,
+  removeList,
+  removeTabFromList,
+  reorderList,
+  replaceLists,
+  restoreFromTrash,
+  restoreTabFromTrash,
+  updateList,
+} from './background/mutations'
 import { SYNC_ALARM, autoPullMerge, pullMerge, pushNow, setupSync } from './background/sync'
 import {
   openTabLists,
@@ -108,6 +117,10 @@ const handleMessage = async (message: Message, sender: chrome.runtime.MessageSen
     }
     case 'trash-restore':
       return restoreFromTrash(message.id)
+    case 'tab-remove':
+      return removeTabFromList(message.listId, message.index, message.url)
+    case 'tab-trash-restore':
+      return restoreTabFromTrash(message.id)
     case 'open-lists':
       return openTabLists()
     case 'sync-setup':
