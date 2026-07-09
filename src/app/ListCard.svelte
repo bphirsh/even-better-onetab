@@ -143,7 +143,16 @@
   const openTab = (index: number) => {
     const tab = list.tabs[index]
     if (!tab) return
-    chrome.tabs.create({ url: tab.url, active: app.opts.focusOpenedTab })
+    // single tabs follow the same "Open tabs in" setting as list restores
+    if (app.opts.restorePosition === 'new-window') {
+      chrome.windows.create({ url: tab.url, focused: app.opts.focusOpenedTab })
+    } else {
+      chrome.tabs.create({
+        url: tab.url,
+        active: app.opts.focusOpenedTab,
+        ...(app.opts.restorePosition === 'start' ? { index: 0 } : {}),
+      })
+    }
     if (app.opts.itemClickAction === 'open-and-remove') {
       const tabs = list.tabs.filter((_, i) => i !== index)
       act({ type: 'list-update', id: list._id, patch: { tabs } })
