@@ -1,8 +1,8 @@
 <script lang="ts">
   import { app, applyTheme, initState } from '../ui/state.svelte'
+  import Header from './Header.svelte'
   import ListsPage from './ListsPage.svelte'
   import SettingsPage from './SettingsPage.svelte'
-  import Sidebar from './Sidebar.svelte'
   import Toast from './Toast.svelte'
 
   initState()
@@ -21,8 +21,8 @@
   })
 </script>
 
-<div class="layout">
-  <Sidebar {route} />
+<div class="shell">
+  <Header {route} />
   <main>
     {#if route === 'settings'}
       <SettingsPage />
@@ -34,13 +34,22 @@
 <Toast />
 
 <style>
-  .layout {
+  /* the page itself never scrolls; only <main> does */
+  :global(html),
+  :global(body) {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .shell {
+    height: 100vh;
     display: flex;
-    min-height: 100vh;
+    flex-direction: column;
   }
 
   main {
     flex: 1;
-    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
   }
 </style>

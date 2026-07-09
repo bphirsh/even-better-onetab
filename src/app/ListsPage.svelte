@@ -48,40 +48,9 @@
     const toIndex = dndItems.findIndex(i => i.id === id)
     if (toIndex >= 0) act({ type: 'lists-reorder', id, toIndex })
   }
-
-  const storeAll = () => act({ type: 'store-tabs', which: 'all' })
 </script>
 
 <div class="page">
-  <div class="toolbar">
-    <div class="search">
-      <Icon name="search" size={15} />
-      <input
-        class="search-input"
-        type="text"
-        placeholder="Search tabs…"
-        bind:value={filters.query}
-      />
-      {#if filters.query}
-        <button class="icon-btn" aria-label="Clear search" onclick={() => (filters.query = '')}>
-          <Icon name="x" size={14} />
-        </button>
-      {/if}
-    </div>
-    {#if filters.tag}
-      <button class="tag-chip" onclick={() => (filters.tag = null)}>
-        <Icon name="tag" size={12} />
-        {filters.tag}
-        <Icon name="x" size={12} />
-      </button>
-    {/if}
-    <div class="spacer"></div>
-    <button class="btn primary" onclick={storeAll}>
-      <Icon name="archive" size={15} />
-      Store all tabs
-    </button>
-  </div>
-
   {#if app.loaded && app.lists.length === 0}
     <div class="empty">
       <Icon name="layers" size={40} />
@@ -112,60 +81,7 @@
   .page {
     max-width: 820px;
     margin: 0 auto;
-    padding: 0 24px 60px;
-  }
-
-  .toolbar {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px 0 12px;
-    background: var(--bg);
-  }
-
-  .search {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 0 1 340px;
-    padding: 0 10px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--surface);
-    color: var(--text-3);
-  }
-
-  .search:focus-within {
-    border-color: var(--accent);
-  }
-
-  .search-input {
-    flex: 1;
-    min-width: 0;
-    padding: 8px 0;
-    border: none;
-    outline: none;
-    background: none;
-    color: var(--text);
-  }
-
-  .tag-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 10px;
-    border-radius: 999px;
-    background: var(--accent-soft);
-    color: var(--accent);
-    font-size: 13px;
-    font-weight: 500;
-  }
-
-  .spacer {
-    flex: 1;
+    padding: 16px 24px 60px;
   }
 
   .lists {
