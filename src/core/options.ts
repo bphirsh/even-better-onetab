@@ -5,6 +5,8 @@ export interface Options {
   theme: 'auto' | 'light' | 'dark'
   /** Spacing scale for the list page. */
   density: 'compact' | 'comfortable'
+  /** Where pinned lists are grouped on the list page. */
+  pinnedPosition: 'top' | 'bottom'
   /** What clicking the toolbar button does. Anything but 'popup' clears the popup so the click reaches the service worker. */
   browserAction: BrowserAction
   /** What clicking a stored tab in the list page does. */
@@ -44,6 +46,7 @@ export interface Options {
 export const DEFAULT_OPTIONS: Options = {
   theme: 'auto',
   density: 'compact',
+  pinnedPosition: 'top',
   browserAction: 'popup',
   itemClickAction: 'open-and-remove',
   focusOpenedTab: true,

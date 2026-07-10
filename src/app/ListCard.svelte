@@ -10,11 +10,7 @@
   import { startAutoScroll, stopAutoScroll } from './dnd-autoscroll'
   import TabRow from './TabRow.svelte'
 
-  let {
-    list,
-    canDrag = false,
-    onHandleDown = () => {},
-  }: { list: TabList; canDrag?: boolean; onHandleDown?: () => void } = $props()
+  let { list, canDrag = false }: { list: TabList; canDrag?: boolean } = $props()
 
   interface TabDndItem {
     id: string
@@ -159,21 +155,38 @@
   }
 
   const accent = $derived(colorOf(list.color))
+
+  /**
+   * The list dndzone stays enabled, but only the grip may start a list drag:
+   * this native bubble-phase listener sits between the tab rows (deeper) and
+   * the zone's item element (higher), so non-grip presses never reach the
+   * library's drag initiator. Tab-row drags have already been handled deeper.
+   */
+  const gateDragToHandle = (node: HTMLElement) => {
+    const gate = (e: Event) => {
+      if (!(e.target as Element).closest('.grip')) e.stopPropagation()
+    }
+    node.addEventListener('mousedown', gate)
+    node.addEventListener('touchstart', gate)
+    return {
+      destroy() {
+        node.removeEventListener('mousedown', gate)
+        node.removeEventListener('touchstart', gate)
+      },
+    }
+  }
 </script>
 
 <svelte:window onclick={onWindowClick} />
 
-<section class="card" style:--list-accent={accent ?? 'transparent'}>
+<section class="card" style:--list-accent={accent ?? 'transparent'} use:gateDragToHandle>
   <header>
     {#if canDrag}
-      <button
-        class="icon-btn grip"
-        aria-label="Drag to reorder"
-        onmousedown={onHandleDown}
-        ontouchstart={onHandleDown}
-      >
+      <!-- not a <button>: the dnd library refuses to start drags from elements
+           with a .value property, which buttons have -->
+      <div class="icon-btn grip" role="button" aria-label="Drag to reorder">
         <Icon name="grip" size={14} />
-      </button>
+      </div>
     {/if}
 
     <button class="icon-btn chevron" class:collapsed={!list.expand} aria-label="Expand or collapse" onclick={toggleExpand}>

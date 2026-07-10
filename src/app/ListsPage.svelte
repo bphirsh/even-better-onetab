@@ -25,16 +25,14 @@
   let dragging = $state(false)
 
   $effect(() => {
-    const items = app.lists.filter(matches).map(list => ({ id: list._id, list }))
-    if (!dragging) dndItems = items
+    const filtered = app.lists.filter(matches)
+    const pinned = filtered.filter(l => l.pinned)
+    const rest = filtered.filter(l => !l.pinned)
+    const ordered = app.opts.pinnedPosition === 'bottom' ? [...rest, ...pinned] : [...pinned, ...rest]
+    if (!dragging) dndItems = ordered.map(list => ({ id: list._id, list }))
   })
 
   const canReorder = $derived(!filtersActive())
-  let dragDisabled = $state(true)
-
-  const startDrag = () => {
-    if (canReorder) dragDisabled = false
-  }
 
   const onConsider = (e: CustomEvent<DndEvent<ListItem>>) => {
     dragging = true
@@ -46,10 +44,9 @@
     dndItems = e.detail.items
     dragging = false
     stopAutoScroll()
-    dragDisabled = true
-    const id = String(e.detail.info.id)
-    const toIndex = dndItems.findIndex(i => i.id === id)
-    if (toIndex >= 0) act({ type: 'lists-reorder', id, toIndex })
+    // the dropped arrangement becomes the stored order; the pinned group
+    // re-floats on top of it, so within-group order is what the drag decides
+    act({ type: 'lists-set-order', ids: dndItems.map(i => i.id) })
   }
 </script>
 
@@ -67,13 +64,13 @@
   {:else}
     <div
       class="lists"
-      use:dndzone={{ items: dndItems, type: 'list', flipDurationMs: 150, dragDisabled, dropTargetStyle: {} }}
+      use:dndzone={{ items: dndItems, type: 'list', flipDurationMs: 150, dragDisabled: !canReorder, dropTargetStyle: {} }}
       onconsider={onConsider}
       onfinalize={onFinalize}
     >
       {#each dndItems as item (item.id)}
         <div class="list-wrap">
-          <ListCard list={item.list} canDrag={canReorder} onHandleDown={startDrag} />
+          <ListCard list={item.list} canDrag={canReorder} />
         </div>
       {/each}
     </div>

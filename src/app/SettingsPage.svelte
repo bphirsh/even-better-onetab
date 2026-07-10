@@ -63,6 +63,19 @@
       </div>
       <div class="row">
         <div class="text">
+          <div class="label">Pinned lists</div>
+        </div>
+        <select
+          class="select"
+          value={app.opts.pinnedPosition}
+          onchange={e => update('pinnedPosition', e.currentTarget.value as Options['pinnedPosition'])}
+        >
+          <option value="top">At the top</option>
+          <option value="bottom">At the bottom</option>
+        </select>
+      </div>
+      <div class="row">
+        <div class="text">
           <div class="label">Tab display</div>
         </div>
         <select class="select" value={app.opts.itemDisplay} onchange={e => update('itemDisplay', e.currentTarget.value as Options['itemDisplay'])}>

@@ -7,7 +7,7 @@ export type Message =
   | { type: 'list-add'; list: Partial<TabList>; index?: number }
   | { type: 'list-update'; id: string; patch: Partial<TabList> }
   | { type: 'list-remove'; id: string }
-  | { type: 'lists-reorder'; id: string; toIndex: number }
+  | { type: 'lists-set-order'; ids: string[] }
   | { type: 'lists-replace'; lists: TabList[] }
   | { type: 'restore-list'; id: string; newWindow?: boolean; remove?: boolean }
   | { type: 'trash-restore'; id: string }

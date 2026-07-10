@@ -8,8 +8,8 @@ import {
   putTrashEntry,
   removeList,
   removeTabFromList,
-  reorderList,
   replaceLists,
+  setListsOrder,
   restoreFromTrash,
   restoreTabFromTrash,
   updateList,
@@ -107,8 +107,8 @@ const handleMessage = async (message: Message, sender: chrome.runtime.MessageSen
       return updateList(message.id, message.patch)
     case 'list-remove':
       return removeList(message.id)
-    case 'lists-reorder':
-      return reorderList(message.id, message.toIndex)
+    case 'lists-set-order':
+      return setListsOrder(message.ids)
     case 'lists-replace':
       return replaceLists(message.lists)
     case 'restore-list': {

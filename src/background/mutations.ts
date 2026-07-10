@@ -156,12 +156,13 @@ export const updateList = (id: string, patch: Partial<TabList>) =>
 export const removeList = (id: string) =>
   mutateLists(lists => lists.filter(l => l._id !== id))
 
-export const reorderList = (id: string, toIndex: number) =>
+/** Applies a full display order (drag reorder); unknown/missing ids keep their place at the end. */
+export const setListsOrder = (ids: string[]) =>
   mutateLists(lists => {
-    const fromIndex = lists.findIndex(l => l._id === id)
-    if (fromIndex < 0) return
-    const [list] = lists.splice(fromIndex, 1)
-    lists.splice(Math.max(0, Math.min(toIndex, lists.length)), 0, touch(list))
+    const byId = new Map(lists.map(l => [l._id, l]))
+    const ordered = ids.map(id => byId.get(id)).filter((l): l is TabList => Boolean(l))
+    const orderedIds = new Set(ordered.map(l => l._id))
+    return [...ordered, ...lists.filter(l => !orderedIds.has(l._id))]
   })
 
 export const replaceLists = (lists: TabList[], sync = true) =>
