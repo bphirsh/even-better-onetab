@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { TabItem, TabList, TrashEntry, TrashTabEntry } from '../core/types'
-  import { colorOf } from '../ui/colors'
   import Icon from '../ui/Icon.svelte'
   import { app } from '../ui/state.svelte'
   import { timeAgo } from '../ui/time'
@@ -134,14 +133,9 @@
               onkeydown={e => e.key === 'Enter' && toggle(key)}
             >
               <span class="chevron" class:open={!collapsed[key]}><Icon name="chevron" size={14} /></span>
-              <span class="color-dot" style:background={colorOf(entry.list.color) ?? 'var(--border)'}></span>
-              <div class="text">
-                {#if entry.list.title}
-                  <div class="label">{entry.list.title}</div>
-                {/if}
-                <div class="desc">Deleted {timeAgo(entry.deletedAt)}</div>
-              </div>
-              <div class="actions">
+              <div class="label">{entry.list.title}</div>
+              <span class="deleted-when">Deleted {timeAgo(entry.deletedAt)}</span>
+              <div class="actions slide">
                 <button
                   class="icon-btn"
                   title="Recover list"
@@ -277,7 +271,7 @@
     transition: max-width 0.18s ease, opacity 0.15s ease;
   }
 
-  .tab-entry:hover .actions.slide,
+  .entry:hover .actions.slide,
   .actions.slide:focus-within {
     max-width: 64px;
     opacity: 1;
@@ -296,13 +290,6 @@
 
   .chevron.open :global(svg) {
     transform: rotate(0deg);
-  }
-
-  .color-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    flex-shrink: 0;
   }
 
   .fav {
@@ -326,21 +313,13 @@
     border-radius: 3px;
   }
 
-  .text {
-    min-width: 0;
-    flex: 1;
-  }
-
   .label {
+    flex: 1;
+    min-width: 0;
     font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  .desc {
-    font-size: 12px;
-    color: var(--text-3);
   }
 
   .actions {
