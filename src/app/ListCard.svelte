@@ -60,7 +60,7 @@
   const startTagsEdit = () => {
     tagsDraft = list.tags.join(', ')
     editingTags = true
-    menuOpen = false
+    closeMenu()
   }
 
   const commitTags = () => {
@@ -71,8 +71,27 @@
   }
 
   // --- menu ---
+  // hover shows the menu transiently; a click pins it open until an outside click
   let menuOpen = $state(false)
+  let menuHover = $state(false)
   let menuEl: HTMLElement | undefined = $state()
+  let hoverTimer: ReturnType<typeof setTimeout> | undefined
+
+  const menuEnter = () => {
+    clearTimeout(hoverTimer)
+    hoverTimer = setTimeout(() => (menuHover = true), 120)
+  }
+
+  const menuLeave = () => {
+    clearTimeout(hoverTimer)
+    hoverTimer = setTimeout(() => (menuHover = false), 220)
+  }
+
+  const closeMenu = () => {
+    menuOpen = false
+    menuHover = false
+    clearTimeout(hoverTimer)
+  }
 
   const onWindowClick = (e: MouseEvent) => {
     if (menuOpen && menuEl && !menuEl.contains(e.target as Node)) menuOpen = false
@@ -86,12 +105,12 @@
     toggleExpand()
   }
   const togglePin = () => {
-    menuOpen = false
+    closeMenu()
     act({ type: 'list-update', id: list._id, patch: { pinned: !list.pinned } })
   }
 
   const setColor = (color: string) => {
-    menuOpen = false
+    closeMenu()
     act({ type: 'list-update', id: list._id, patch: { color } })
   }
 
@@ -107,7 +126,7 @@
   })
 
   const restore = async (newWindow = false, remove = false) => {
-    menuOpen = false
+    closeMenu()
     if (!remove) {
       act({ type: 'restore-list', id: list._id, newWindow })
       return
@@ -118,7 +137,7 @@
   }
 
   const removeListNow = async () => {
-    menuOpen = false
+    closeMenu()
     if (app.opts.alertRemoveList && !confirm(`Delete “${list.title || `${list.tabs.length} tabs`}”?`)) return
     const captured = captureForUndo()
     const { ok } = await act({ type: 'list-remove', id: list._id })
@@ -126,7 +145,7 @@
   }
 
   const copyMarkdown = async () => {
-    menuOpen = false
+    closeMenu()
     const escapeTitle = (s: string) => s.replace(/[\[\]]/g, m => '\\' + m)
     const lines = list.tabs.map(t => `- [${escapeTitle(t.title || t.url)}](${t.url})`)
     const text = (list.title ? `## ${list.title}\n\n` : '') + lines.join('\n') + '\n'
@@ -231,11 +250,11 @@
       <button class="icon-btn delete-btn" title="Delete list" aria-label="Delete list" onclick={removeListNow}>
         <Icon name="trash" size={15} />
       </button>
-      <div class="dropdown" bind:this={menuEl}>
-        <button class="icon-btn" title="More" onclick={() => (menuOpen = !menuOpen)}>
+      <div class="dropdown" bind:this={menuEl} onmouseenter={menuEnter} onmouseleave={menuLeave}>
+        <button class="icon-btn" title="More" onclick={() => (menuOpen = true)}>
           <Icon name="more" size={15} />
         </button>
-        {#if menuOpen}
+        {#if menuOpen || menuHover}
           <div class="menu">
             <button class="menu-item" onclick={() => restore(true)}>
               <Icon name="external" size={14} /> Open in new window
