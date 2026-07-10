@@ -167,14 +167,17 @@
         {:else}
           {@const entry = item.entry}
           <div class="entry">
-            <div class="row static">
-              {@render favicon(entry.tab)}
-              <div class="text">
-                <div class="label">{entry.tab.title || entry.tab.url}</div>
-                <div class="desc">{domain(entry.tab.url)} · from “{entry.listTitle || 'Untitled'}” · {timeAgo(entry.deletedAt)}</div>
-              </div>
+            <div class="tab-entry">
+              <button
+                class="tab"
+                title={`${entry.tab.url} — from “${entry.listTitle || 'Untitled'}”, deleted ${timeAgo(entry.deletedAt)}`}
+                onclick={() => openTab(entry.tab.url)}
+              >
+                {@render favicon(entry.tab)}
+                <span class="tab-title">{entry.tab.title || entry.tab.url}</span>
+                <span class="tab-domain">{domain(entry.tab.url)}</span>
+              </button>
               <div class="actions">
-                <button class="open-mini" onclick={() => openTab(entry.tab.url)}>Open</button>
                 <button class="icon-btn" title="Recover tab" aria-label="Recover tab" onclick={() => recoverTab(entry.id)}>
                   <Icon name="restore" size={15} />
                 </button>
@@ -246,8 +249,16 @@
     cursor: pointer;
   }
 
-  .row.static {
-    cursor: default;
+  .tab-entry {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 0;
+  }
+
+  .tab-entry .tab {
+    flex: 1;
+    min-width: 0;
   }
 
   .chevron {
@@ -319,18 +330,6 @@
 
   .actions .del:hover {
     color: var(--danger);
-  }
-
-  .open-mini {
-    padding: 3px 10px;
-    border-radius: 6px;
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--accent);
-  }
-
-  .open-mini:hover {
-    background: var(--accent-soft);
   }
 
   .tab-list {
