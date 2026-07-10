@@ -22,6 +22,8 @@
   let searchInput: HTMLInputElement | undefined = $state()
 
   const openSearch = () => {
+    // search lives on the list page — jump there first if needed
+    if (route !== 'lists') location.hash = '#/'
     searchOpen = true
     requestAnimationFrame(() => searchInput?.focus())
   }
@@ -56,27 +58,25 @@
 
     <div class="spacer"></div>
 
-    {#if route === 'lists'}
-      <div class="search" class:open={searchOpen || filters.query}>
-        <button class="icon-btn" title="Search" aria-label="Search" onclick={openSearch}>
-          <Icon name="search" size={16} />
+    <div class="search" class:open={route === 'lists' && (searchOpen || filters.query)}>
+      <button class="icon-btn" title="Search" aria-label="Search" onclick={openSearch}>
+        <Icon name="search" size={16} />
+      </button>
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search tabs…"
+        bind:this={searchInput}
+        bind:value={filters.query}
+        onblur={onSearchBlur}
+        onkeydown={onSearchKeydown}
+      />
+      {#if filters.query}
+        <button class="icon-btn" aria-label="Clear search" onclick={() => ((filters.query = ''), searchInput?.focus())}>
+          <Icon name="x" size={14} />
         </button>
-        <input
-          class="search-input"
-          type="text"
-          placeholder="Search tabs…"
-          bind:this={searchInput}
-          bind:value={filters.query}
-          onblur={onSearchBlur}
-          onkeydown={onSearchKeydown}
-        />
-        {#if filters.query}
-          <button class="icon-btn" aria-label="Clear search" onclick={() => ((filters.query = ''), searchInput?.focus())}>
-            <Icon name="x" size={14} />
-          </button>
-        {/if}
-      </div>
-    {/if}
+      {/if}
+    </div>
 
     <button
       class="icon-btn nav-btn"
@@ -85,7 +85,7 @@
       aria-label="Deleted history"
       onclick={() => toggleRoute('history')}
     >
-      <Icon name="restore" size={16} />
+      <Icon name="archive" size={16} />
     </button>
     <button
       class="icon-btn nav-btn"
