@@ -22,9 +22,9 @@
   const retentionNote = $derived(
     ({
       immediately: 'New deletions are removed immediately.',
-      day: 'Kept for 1 day, then cleared.',
-      week: 'Kept for 1 week, then cleared.',
-      month: 'Kept for 1 month, then cleared.',
+      day: 'Items are deleted after 1 day.',
+      week: 'Items are deleted after 1 week.',
+      month: 'Items are deleted after 1 month.',
     })[app.opts.trashRetention],
   )
 
@@ -156,7 +156,7 @@
               >
                 <span class="chevron" class:open={!collapsed[key]}><Icon name="chevron" size={14} /></span>
                 <div class="label">{entry.list.title}</div>
-                <span class="deleted-when">Deleted {timeAgo(entry.deletedAt)}</span>
+                <span class="deleted-when">{timeAgo(entry.deletedAt)}</span>
                 {@render listActions(entry)}
               </div>
               {#if !collapsed[key]}
@@ -189,7 +189,7 @@
                   {/if}
                 </div>
                 <div class="merged-meta">
-                  <span class="deleted-when">Deleted {timeAgo(entry.deletedAt)}</span>
+                  <span class="deleted-when">{timeAgo(entry.deletedAt)}</span>
                   {@render listActions(entry)}
                 </div>
               </div>
@@ -208,7 +208,7 @@
                 <span class="tab-title">{entry.tab.title || entry.tab.url}</span>
                 <span class="tab-domain">{domain(entry.tab.url)}</span>
               </button>
-              <span class="deleted-when">Deleted {timeAgo(entry.deletedAt)}</span>
+              <span class="deleted-when">{timeAgo(entry.deletedAt)}</span>
               <div class="actions slide">
                 <button class="icon-btn" title="Recover tab" aria-label="Recover tab" onclick={() => recoverTab(entry.id)}>
                   <Icon name="restore" size={15} />
