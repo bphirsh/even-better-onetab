@@ -28,7 +28,6 @@ export interface TabList {
   pinned: boolean
   expand: boolean
   color: string
-  archived: boolean
   updatedAt: number
 }
 

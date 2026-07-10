@@ -26,8 +26,7 @@
     return () => window.removeEventListener('hashchange', onHashChange)
   })
 
-  const activeLists = $derived(app.lists.filter(l => !l.archived))
-  const totalTabs = $derived(activeLists.reduce((sum, list) => sum + list.tabs.length, 0))
+  const totalTabs = $derived(app.lists.reduce((sum, list) => sum + list.tabs.length, 0))
 
   const syncStatus = $derived.by(() => {
     if (!app.syncConfig.enabled) return null
@@ -56,7 +55,7 @@
     <span>{syncStatus.text}</span>
     <span class="sep">·</span>
   {/if}
-  <span>{activeLists.length} lists · {totalTabs} tabs</span>
+  <span>{app.lists.length} lists · {totalTabs} tabs</span>
 </a>
 <Toast />
 

@@ -8,7 +8,6 @@
   const tagCounts = $derived.by(() => {
     const counts = new Map<string, number>()
     for (const list of app.lists) {
-      if (list.archived) continue
       for (const tag of list.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1)
     }
     return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]))
@@ -82,11 +81,11 @@
     <button
       class="icon-btn nav-btn"
       class:active={route === 'history'}
-      title="Archive & history"
-      aria-label="Archive & history"
+      title="Deleted history"
+      aria-label="Deleted history"
       onclick={() => toggleRoute('history')}
     >
-      <Icon name="archive" size={16} />
+      <Icon name="restore" size={16} />
     </button>
     <button
       class="icon-btn nav-btn"

@@ -226,7 +226,7 @@ export const restoreList = async (list: TabList, { windowId, newWindow }: { wind
 }
 
 export const restoreLatestList = async () => {
-  const lists = (await getLists()).filter(l => !l.archived)
+  const lists = await getLists()
   const latest = lists.find(l => !l.pinned) ?? lists[0]
   if (!latest) return
   await restoreList(latest)

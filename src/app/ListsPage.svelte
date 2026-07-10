@@ -14,7 +14,6 @@
   }
 
   const matches = (list: TabList) => {
-    if (list.archived) return false
     if (filters.tag && !list.tags.includes(filters.tag)) return false
     const q = filters.query.trim().toLowerCase()
     if (!q) return true

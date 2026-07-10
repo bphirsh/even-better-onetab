@@ -178,7 +178,6 @@
     container.innerHTML = ''
     let shown = 0
     for (const list of lists) {
-      if (list.archived) continue
       const tabs = q
         ? list.tabs.filter(t => (t.title || '').toLowerCase().includes(q) || t.url.toLowerCase().includes(q))
         : list.tabs

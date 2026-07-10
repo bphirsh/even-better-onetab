@@ -7,8 +7,6 @@
   import { toast } from '../ui/toast.svelte'
   import { act } from './actions'
 
-  const archived = $derived(app.lists.filter(l => l.archived))
-
   const retentionLabel = $derived(
     ({ immediately: 'removed immediately', day: 'kept for 1 day', week: 'kept for 1 week', month: 'kept for 1 month' })[
       app.opts.trashRetention
@@ -35,16 +33,6 @@
   }
 
   const openTab = (url: string) => chrome.tabs.create({ url, active: app.opts.focusOpenedTab })
-
-  const unarchive = (id: string) => act({ type: 'list-update', id, patch: { archived: false } }, 'Moved back to Lists')
-
-  const openList = (id: string) => act({ type: 'restore-list', id })
-
-  const deleteList = async (list: TabList) => {
-    if (app.opts.alertRemoveList && !confirm(`Delete “${label(list)}”?`)) return
-    const { ok } = await act({ type: 'list-remove', id: list._id })
-    if (ok) toast(app.opts.trashRetention === 'immediately' ? 'List deleted' : 'List deleted — recoverable below')
-  }
 
   const recover = async (id: string) => {
     const { ok } = await act({ type: 'trash-restore', id })
@@ -100,52 +88,7 @@
 {/snippet}
 
 <div class="page">
-  <h1>Archive &amp; history</h1>
-
-  <section>
-    <h2>Archived</h2>
-    {#if archived.length === 0}
-      <p class="empty">Nothing archived. Archiving hides a list from the main page without deleting it — find it in a list’s ⋯ menu.</p>
-    {:else}
-      <div class="card">
-        {#each archived as list (list._id)}
-          <div class="entry">
-            <div
-              class="row"
-              role="button"
-              tabindex="0"
-              onclick={() => toggle(list._id)}
-              onkeydown={e => e.key === 'Enter' && toggle(list._id)}
-            >
-              <span class="chevron" class:open={expanded[list._id]}><Icon name="chevron" size={14} /></span>
-              <span class="color-dot" style:background={colorOf(list.color) ?? 'var(--border)'}></span>
-              <div class="text">
-                <div class="label" class:untitled={!list.title}>{label(list)}</div>
-                <div class="desc">{list.tabs.length} tab{list.tabs.length === 1 ? '' : 's'} · stored {timeAgo(list.time)}</div>
-              </div>
-              <div class="actions">
-                <button class="btn" onclick={e => (e.stopPropagation(), openList(list._id))}>Open</button>
-                <button class="btn" onclick={e => (e.stopPropagation(), unarchive(list._id))}>
-                  <Icon name="upload" size={13} /> Unarchive
-                </button>
-                <button
-                  class="btn danger"
-                  title="Delete list"
-                  aria-label="Delete list"
-                  onclick={e => (e.stopPropagation(), deleteList(list))}
-                >
-                  <Icon name="trash" size={13} />
-                </button>
-              </div>
-            </div>
-            {#if expanded[list._id]}
-              {@render tabsPreview(list)}
-            {/if}
-          </div>
-        {/each}
-      </div>
-    {/if}
-  </section>
+  <h1>Deleted history</h1>
 
   <section>
     <h2>Recently deleted lists</h2>

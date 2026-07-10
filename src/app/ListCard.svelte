@@ -123,17 +123,6 @@
     if (ok) toast('List deleted', 'info', undoAction(captured))
   }
 
-  const archiveList = async () => {
-    menuOpen = false
-    const { ok } = await act({ type: 'list-update', id: list._id, patch: { archived: true } })
-    if (ok) {
-      toast('List archived', 'info', {
-        label: 'Undo',
-        fn: () => act({ type: 'list-update', id: list._id, patch: { archived: false } }),
-      })
-    }
-  }
-
   const copyMarkdown = async () => {
     menuOpen = false
     const escapeTitle = (s: string) => s.replace(/[\[\]]/g, m => '\\' + m)
@@ -219,9 +208,6 @@
 
     <div class="actions">
       <button class="open-btn" title="Open all tabs in this list" onclick={() => restore()}>Open</button>
-      <button class="icon-btn" title="Archive list" aria-label="Archive list" onclick={archiveList}>
-        <Icon name="archive" size={15} />
-      </button>
       <div class="dropdown" bind:this={menuEl}>
         <button class="icon-btn" title="More" onclick={() => (menuOpen = !menuOpen)}>
           <Icon name="more" size={15} />
@@ -238,9 +224,6 @@
             <button class="menu-item" onclick={togglePin}>
               <Icon name="pin" size={14} />
               {list.pinned ? 'Unpin' : 'Pin'}
-            </button>
-            <button class="menu-item" onclick={archiveList}>
-              <Icon name="archive" size={14} /> Archive
             </button>
             <button class="menu-item" onclick={startTagsEdit}>
               <Icon name="tag" size={14} /> Edit tags
