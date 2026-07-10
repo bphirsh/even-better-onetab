@@ -208,6 +208,9 @@
 
     <div class="actions">
       <button class="open-btn" title="Open all tabs in this list" onclick={() => restore()}>Open</button>
+      <button class="icon-btn delete-btn" title="Delete list" aria-label="Delete list" onclick={removeListNow}>
+        <Icon name="trash" size={15} />
+      </button>
       <div class="dropdown" bind:this={menuEl}>
         <button class="icon-btn" title="More" onclick={() => (menuOpen = !menuOpen)}>
           <Icon name="more" size={15} />
@@ -420,6 +423,10 @@
 
   .open-btn:hover {
     background: var(--accent-soft);
+  }
+
+  .delete-btn:hover {
+    color: var(--danger);
   }
 
   /* comfortable density */
