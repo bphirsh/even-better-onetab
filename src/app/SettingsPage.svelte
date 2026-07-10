@@ -7,8 +7,8 @@
   import TabRow from './TabRow.svelte'
 
   const demoTabs = [
-    { url: 'https://en.wikipedia.org/wiki/Forest', title: 'Forest - Wikipedia' },
-    { url: 'https://github.com/bphirsh/even-better-onetab', title: 'bphirsh/even-better-onetab: Store and restore your tabs' },
+    { url: 'https://en.wikipedia.org/wiki/Forest', title: 'Forest - Wikipedia', favIconUrl: 'https://en.wikipedia.org/favicon.ico' },
+    { url: 'https://brianhirsh.com', title: 'Brian Hirsh', favIconUrl: 'https://brianhirsh.com/favicon-32x32.png' },
   ]
 
   const update = <K extends keyof Options>(key: K, value: Options[K]) =>
@@ -343,12 +343,17 @@
   }
 
   .demo {
-    margin: 2px 0 12px;
-    padding: 4px 4px 4px 0;
+    margin: 12px 0 14px;
+    padding: 6px 8px;
     border: 1px dashed var(--border);
     border-radius: var(--radius-sm);
     background: var(--bg);
     pointer-events: none;
+  }
+
+  /* demo rows don't need the list page's expansion indent */
+  .demo :global(.row) {
+    padding-left: 8px;
   }
 
   .support {
