@@ -68,7 +68,7 @@
     const trash = $state.snapshot(app.trash) as TrashEntry[]
     const tabTrash = $state.snapshot(app.tabTrash) as TrashTabEntry[]
     const { ok } = await act({ type: 'trash-clear' })
-    if (ok) toast('History cleared', 'info', { label: 'Undo', fn: () => act({ type: 'trash-put-all', trash, tabTrash }) })
+    if (ok) toast('All history deleted', 'info', { label: 'Undo', fn: () => act({ type: 'trash-put-all', trash, tabTrash }) })
   }
 </script>
 
@@ -128,7 +128,7 @@
     <h1>Recently Deleted</h1>
     {#if feed.length > 0}
       <button class="btn danger" onclick={clearAll}>
-        <Icon name="trash" size={13} /> Clear all
+        <Icon name="trash" size={13} /> Delete all
       </button>
     {/if}
   </div>
