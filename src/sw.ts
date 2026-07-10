@@ -2,8 +2,10 @@ import { handleMenuClick, rebuildMenus } from './background/menus'
 import { migrateFromV1 } from './background/migrate'
 import {
   addList,
+  clearAllTrash,
   deleteTabTrashEntry,
   deleteTrashEntry,
+  putAllTrash,
   putTabTrashEntry,
   putTrashEntry,
   removeList,
@@ -133,6 +135,10 @@ const handleMessage = async (message: Message, sender: chrome.runtime.MessageSen
       return deleteTabTrashEntry(message.id)
     case 'tab-trash-put':
       return putTabTrashEntry(message.entry)
+    case 'trash-clear':
+      return clearAllTrash()
+    case 'trash-put-all':
+      return putAllTrash(message.trash, message.tabTrash)
     case 'open-lists':
       return openTabLists()
     case 'sync-setup':

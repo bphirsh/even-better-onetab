@@ -17,6 +17,8 @@ export type Message =
   | { type: 'trash-put'; entry: TrashEntry }
   | { type: 'tab-trash-delete'; id: string }
   | { type: 'tab-trash-put'; entry: TrashTabEntry }
+  | { type: 'trash-clear' }
+  | { type: 'trash-put-all'; trash: TrashEntry[]; tabTrash: TrashTabEntry[] }
   | { type: 'open-lists' }
   | { type: 'sync-setup'; token: string }
   | { type: 'sync-push' }

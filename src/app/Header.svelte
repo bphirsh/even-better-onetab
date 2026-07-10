@@ -81,8 +81,8 @@
     <button
       class="icon-btn nav-btn"
       class:active={route === 'history'}
-      title="Deleted history"
-      aria-label="Deleted history"
+      title="Recently deleted"
+      aria-label="Recently deleted"
       onclick={() => toggleRoute('history')}
     >
       <Icon name="archive" size={16} />

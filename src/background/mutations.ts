@@ -126,6 +126,20 @@ export const putTabTrashEntry = (entry: TrashTabEntry) =>
     await setTabTrash([entry, ...trash])
   })
 
+/** Empties the whole deleted history (both lists and tabs). */
+export const clearAllTrash = () =>
+  enqueue(async () => {
+    await setTrash([])
+    await setTabTrash([])
+  })
+
+/** Restores the whole deleted history (undo of Clear all). */
+export const putAllTrash = (trash: TrashEntry[], tabTrash: TrashTabEntry[]) =>
+  enqueue(async () => {
+    await setTrash(trash)
+    await setTabTrash(tabTrash)
+  })
+
 /** Recovers a deleted tab into its original list, or a recreated one if it's gone. */
 export const restoreTabFromTrash = async (entryId: string) => {
   const trash = await getTabTrash()

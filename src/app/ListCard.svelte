@@ -206,7 +206,7 @@
 
 <section class="card" style:--list-accent={accent ?? 'transparent'} use:gateDragToHandle>
   <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-  <header onclick={onHeaderClick}>
+  <header class:auto-hide={!list.title && !editingTitle} onclick={onHeaderClick}>
     {#if canDrag}
       <!-- not a <button>: the dnd library refuses to start drags from elements
            with a .value property, which buttons have -->
@@ -353,15 +353,33 @@
     border-left: 3px solid var(--list-accent);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    padding: 6px 10px 8px;
+    padding: 4px 10px 6px;
   }
 
   header {
     display: flex;
     align-items: center;
     gap: 6px;
-    min-height: 36px;
+    min-height: 32px;
     cursor: pointer;
+  }
+
+  /* untitled lists: the header takes no space until the card is hovered
+     (or the menu is pinned open / something inside has focus) */
+  header.auto-hide {
+    min-height: 0;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.18s ease, opacity 0.15s ease;
+  }
+
+  .card:hover header.auto-hide,
+  header.auto-hide:focus-within,
+  header.auto-hide:has(.menu) {
+    max-height: 34px;
+    opacity: 1;
+    overflow: visible;
   }
 
   .grip {
@@ -474,8 +492,8 @@
     padding: 10px 14px 12px;
   }
 
-  :global(.comfortable) header {
-    min-height: 42px;
+  :global(.comfortable) header:not(.auto-hide) {
+    min-height: 40px;
   }
 
   .dropdown {

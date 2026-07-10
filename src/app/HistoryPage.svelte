@@ -7,20 +7,31 @@
   import { toast } from '../ui/toast.svelte'
   import { act } from './actions'
 
-  const retentionLabel = $derived(
-    ({ immediately: 'removed immediately', day: 'kept for 1 day', week: 'kept for 1 week', month: 'kept for 1 month' })[
-      app.opts.trashRetention
-    ],
+  type FeedEntry = { kind: 'list'; entry: TrashEntry } | { kind: 'tab'; entry: TrashTabEntry }
+
+  const feed = $derived(
+    [
+      ...app.trash.map(entry => ({ kind: 'list', entry }) as FeedEntry),
+      ...app.tabTrash.map(entry => ({ kind: 'tab', entry }) as FeedEntry),
+    ].sort((a, b) => b.entry.deletedAt - a.entry.deletedAt),
   )
 
-  let expanded = $state<Record<string, boolean>>({})
-  const toggle = (key: string) => (expanded[key] = !expanded[key])
-
   const CAP = 10
-  let showAllLists = $state(false)
-  let showAllTabs = $state(false)
-  const visibleTrash = $derived(showAllLists ? app.trash : app.trash.slice(0, CAP))
-  const visibleTabTrash = $derived(showAllTabs ? app.tabTrash : app.tabTrash.slice(0, CAP))
+  let showAll = $state(false)
+  const visible = $derived(showAll ? feed : feed.slice(0, CAP))
+
+  const retentionNote = $derived(
+    ({
+      immediately: 'New deletions are removed immediately.',
+      day: 'Kept for 1 day, then cleared.',
+      week: 'Kept for 1 week, then cleared.',
+      month: 'Kept for 1 month, then cleared.',
+    })[app.opts.trashRetention],
+  )
+
+  // lists start expanded; clicking collapses
+  let collapsed = $state<Record<string, boolean>>({})
+  const toggle = (key: string) => (collapsed[key] = !collapsed[key])
 
   const label = (list: TabList) => list.title || `${list.tabs.length} tab${list.tabs.length === 1 ? '' : 's'}`
 
@@ -55,6 +66,13 @@
     const { ok } = await act({ type: 'tab-trash-delete', id: entry.id })
     if (ok) toast('Tab permanently deleted', 'info', { label: 'Undo', fn: () => act({ type: 'tab-trash-put', entry: copy }) })
   }
+
+  const clearAll = async () => {
+    const trash = $state.snapshot(app.trash) as TrashEntry[]
+    const tabTrash = $state.snapshot(app.tabTrash) as TrashTabEntry[]
+    const { ok } = await act({ type: 'trash-clear' })
+    if (ok) toast('History cleared', 'info', { label: 'Undo', fn: () => act({ type: 'trash-put-all', trash, tabTrash }) })
+  }
 </script>
 
 {#snippet favicon(tab: TabItem)}
@@ -88,17 +106,26 @@
 {/snippet}
 
 <div class="page">
-  <h1>Deleted history</h1>
+  <div class="page-head">
+    <h1>Recently Deleted</h1>
+    {#if feed.length > 0}
+      <button class="btn danger" onclick={clearAll}>
+        <Icon name="trash" size={13} /> Clear all
+      </button>
+    {/if}
+  </div>
 
-  <section>
-    <h2>Recently deleted lists</h2>
-    {#if app.opts.trashRetention === 'immediately' && app.trash.length === 0}
-      <p class="empty">Deleted lists are removed immediately — change “Deleted lists are” in Settings to keep them recoverable here.</p>
-    {:else if app.trash.length === 0}
-      <p class="empty">No deleted lists. Deleted lists are {retentionLabel} on this device.</p>
+  {#if feed.length === 0}
+    {#if app.opts.trashRetention === 'immediately'}
+      <p class="empty">Deleted items are removed immediately — change “Deleted lists are” in Settings to keep them recoverable here.</p>
     {:else}
-      <div class="card">
-        {#each visibleTrash as entry (entry.list._id + entry.deletedAt)}
+      <p class="empty">Nothing here. Deleted lists and tabs land here so you can recover them.</p>
+    {/if}
+  {:else}
+    <div class="card">
+      {#each visible as item (item.kind + (item.kind === 'list' ? item.entry.list._id + item.entry.deletedAt : item.entry.id))}
+        {#if item.kind === 'list'}
+          {@const entry = item.entry}
           {@const key = entry.list._id + entry.deletedAt}
           <div class="entry">
             <div
@@ -108,11 +135,11 @@
               onclick={() => toggle(key)}
               onkeydown={e => e.key === 'Enter' && toggle(key)}
             >
-              <span class="chevron" class:open={expanded[key]}><Icon name="chevron" size={14} /></span>
+              <span class="chevron" class:open={!collapsed[key]}><Icon name="chevron" size={14} /></span>
               <span class="color-dot" style:background={colorOf(entry.list.color) ?? 'var(--border)'}></span>
               <div class="text">
                 <div class="label" class:untitled={!entry.list.title}>{label(entry.list)}</div>
-                <div class="desc">{entry.list.tabs.length} tab{entry.list.tabs.length === 1 ? '' : 's'} · deleted {timeAgo(entry.deletedAt)}</div>
+                <div class="desc">Deleted {timeAgo(entry.deletedAt)}</div>
               </div>
               <div class="actions">
                 <button class="btn" onclick={e => (e.stopPropagation(), recover(entry.list._id))}>
@@ -128,42 +155,18 @@
                 </button>
               </div>
             </div>
-            {#if expanded[key]}
+            {#if !collapsed[key]}
               {@render tabsPreview(entry.list)}
             {/if}
           </div>
-        {/each}
-      </div>
-      {#if app.trash.length > CAP && !showAllLists}
-        <button class="see-all" onclick={() => (showAllLists = true)}>See all ({app.trash.length})</button>
-      {/if}
-      {#if app.opts.trashRetention === 'immediately'}
-        <p class="note">New deletions are removed immediately — these entries disappear when the page reloads.</p>
-      {:else}
-        <p class="note">Deleted lists are {retentionLabel} on this device, then cleared automatically.</p>
-      {/if}
-    {/if}
-  </section>
-
-  <section>
-    <h2>Recently deleted tabs</h2>
-    {#if app.tabTrash.length === 0}
-      {#if app.opts.trashRetention === 'immediately'}
-        <p class="empty">Deleted tabs are removed immediately — change “Deleted lists are” in Settings to keep them recoverable here.</p>
-      {:else}
-        <p class="empty">No deleted tabs. Tabs removed from a list with ✕ are kept here, {retentionLabel}.</p>
-      {/if}
-    {:else}
-      <div class="card">
-        {#each visibleTabTrash as entry (entry.id)}
+        {:else}
+          {@const entry = item.entry}
           <div class="entry">
             <div class="row static">
               {@render favicon(entry.tab)}
               <div class="text">
                 <div class="label">{entry.tab.title || entry.tab.url}</div>
-                <div class="desc">
-                  {domain(entry.tab.url)} · from “{entry.listTitle || 'Untitled'}” · deleted {timeAgo(entry.deletedAt)}
-                </div>
+                <div class="desc">{domain(entry.tab.url)} · from “{entry.listTitle || 'Untitled'}” · {timeAgo(entry.deletedAt)}</div>
               </div>
               <div class="actions">
                 <button class="btn" onclick={() => openTab(entry.tab.url)}>Open</button>
@@ -181,13 +184,14 @@
               </div>
             </div>
           </div>
-        {/each}
-      </div>
-      {#if app.tabTrash.length > CAP && !showAllTabs}
-        <button class="see-all" onclick={() => (showAllTabs = true)}>See all ({app.tabTrash.length})</button>
-      {/if}
+        {/if}
+      {/each}
+    </div>
+    {#if feed.length > CAP && !showAll}
+      <button class="see-all" onclick={() => (showAll = true)}>See all ({feed.length})</button>
     {/if}
-  </section>
+    <p class="note">{retentionNote}</p>
+  {/if}
 </div>
 
 <style>
@@ -197,23 +201,18 @@
     padding: 18px 24px 80px;
   }
 
+  .page-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 18px;
+  }
+
   h1 {
     font-size: 20px;
-    margin: 0 0 18px;
+    margin: 0;
     letter-spacing: -0.01em;
-  }
-
-  section {
-    margin-bottom: 26px;
-  }
-
-  h2 {
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-3);
-    margin: 0 0 8px 2px;
   }
 
   .card {
@@ -242,6 +241,10 @@
     cursor: pointer;
   }
 
+  .row.static {
+    cursor: default;
+  }
+
   .chevron {
     display: inline-flex;
     color: var(--text-3);
@@ -262,6 +265,27 @@
     height: 9px;
     border-radius: 50%;
     flex-shrink: 0;
+  }
+
+  .fav {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-2);
+    color: var(--text-3);
+    font-size: 10px;
+    font-weight: 600;
+    overflow: hidden;
+  }
+
+  .fav img {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
   }
 
   .text {
@@ -337,31 +361,6 @@
     color: var(--text-3);
   }
 
-  .row.static {
-    cursor: default;
-  }
-
-  .fav {
-    width: 16px;
-    height: 16px;
-    border-radius: 3px;
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--surface-2);
-    color: var(--text-3);
-    font-size: 10px;
-    font-weight: 600;
-    overflow: hidden;
-  }
-
-  .fav img {
-    width: 16px;
-    height: 16px;
-    border-radius: 3px;
-  }
-
   .see-all {
     display: block;
     margin: 8px auto 0;
@@ -381,5 +380,10 @@
     color: var(--text-3);
     font-size: 13px;
     margin: 4px 2px;
+  }
+
+  .note {
+    margin-top: 10px;
+    text-align: center;
   }
 </style>
