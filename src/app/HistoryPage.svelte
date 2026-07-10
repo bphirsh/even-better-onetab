@@ -177,7 +177,8 @@
                 <span class="tab-title">{entry.tab.title || entry.tab.url}</span>
                 <span class="tab-domain">{domain(entry.tab.url)}</span>
               </button>
-              <div class="actions">
+              <span class="deleted-when">Deleted {timeAgo(entry.deletedAt)}</span>
+              <div class="actions slide">
                 <button class="icon-btn" title="Recover tab" aria-label="Recover tab" onclick={() => recoverTab(entry.id)}>
                   <Icon name="restore" size={15} />
                 </button>
@@ -259,6 +260,27 @@
   .tab-entry .tab {
     flex: 1;
     min-width: 0;
+  }
+
+  .deleted-when {
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--text-3);
+    white-space: nowrap;
+  }
+
+  /* actions slide in on hover; at rest the row text extends into their space */
+  .actions.slide {
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-width 0.18s ease, opacity 0.15s ease;
+  }
+
+  .tab-entry:hover .actions.slide,
+  .actions.slide:focus-within {
+    max-width: 64px;
+    opacity: 1;
   }
 
   .chevron {
