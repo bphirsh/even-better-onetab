@@ -90,6 +90,27 @@
   </span>
 {/snippet}
 
+{#snippet listActions(entry: TrashEntry)}
+  <div class="actions slide">
+    <button
+      class="icon-btn"
+      title="Recover list"
+      aria-label="Recover list"
+      onclick={e => (e.stopPropagation(), recover(entry.list._id))}
+    >
+      <Icon name="restore" size={15} />
+    </button>
+    <button
+      class="icon-btn del"
+      title="Delete permanently"
+      aria-label="Delete permanently"
+      onclick={e => (e.stopPropagation(), deleteListForever(entry))}
+    >
+      <Icon name="trash" size={15} />
+    </button>
+  </div>
+{/snippet}
+
 {#snippet tabsPreview(list: TabList)}
   <div class="tab-list">
     {#each list.tabs as tab, i (i)}
@@ -125,37 +146,53 @@
           {@const entry = item.entry}
           {@const key = entry.list._id + entry.deletedAt}
           <div class="entry">
-            <div
-              class="row"
-              role="button"
-              tabindex="0"
-              onclick={() => toggle(key)}
-              onkeydown={e => e.key === 'Enter' && toggle(key)}
-            >
-              <span class="chevron" class:open={!collapsed[key]}><Icon name="chevron" size={14} /></span>
-              <div class="label">{entry.list.title}</div>
-              <span class="deleted-when">Deleted {timeAgo(entry.deletedAt)}</span>
-              <div class="actions slide">
-                <button
-                  class="icon-btn"
-                  title="Recover list"
-                  aria-label="Recover list"
-                  onclick={e => (e.stopPropagation(), recover(entry.list._id))}
-                >
-                  <Icon name="restore" size={15} />
-                </button>
-                <button
-                  class="icon-btn del"
-                  title="Delete permanently"
-                  aria-label="Delete permanently"
-                  onclick={e => (e.stopPropagation(), deleteListForever(entry))}
-                >
-                  <Icon name="trash" size={15} />
-                </button>
+            {#if entry.list.title}
+              <div
+                class="row"
+                role="button"
+                tabindex="0"
+                onclick={() => toggle(key)}
+                onkeydown={e => e.key === 'Enter' && toggle(key)}
+              >
+                <span class="chevron" class:open={!collapsed[key]}><Icon name="chevron" size={14} /></span>
+                <div class="label">{entry.list.title}</div>
+                <span class="deleted-when">Deleted {timeAgo(entry.deletedAt)}</span>
+                {@render listActions(entry)}
               </div>
-            </div>
-            {#if !collapsed[key]}
-              {@render tabsPreview(entry.list)}
+              {#if !collapsed[key]}
+                {@render tabsPreview(entry.list)}
+              {/if}
+            {:else}
+              <!-- untitled: no header row — tabs start at the top, chevron in a
+                   slim left column, timestamp anchored to the first line -->
+              <div class="merged">
+                <button
+                  class="chev-col"
+                  aria-label="Expand or collapse"
+                  onclick={() => toggle(key)}
+                >
+                  <span class="chevron" class:open={!collapsed[key]}><Icon name="chevron" size={14} /></span>
+                </button>
+                <div class="merged-tabs">
+                  {#if collapsed[key]}
+                    <button class="tab summary" onclick={() => toggle(key)}>
+                      {entry.list.tabs.length} tab{entry.list.tabs.length === 1 ? '' : 's'}
+                    </button>
+                  {:else}
+                    {#each entry.list.tabs as tab, i (i)}
+                      <button class="tab" title={tab.url} onclick={() => openTab(tab.url)}>
+                        {@render favicon(tab)}
+                        <span class="tab-title">{tab.title || tab.url}</span>
+                        <span class="tab-domain">{domain(tab.url)}</span>
+                      </button>
+                    {/each}
+                  {/if}
+                </div>
+                <div class="merged-meta">
+                  <span class="deleted-when">Deleted {timeAgo(entry.deletedAt)}</span>
+                  {@render listActions(entry)}
+                </div>
+              </div>
             {/if}
           </div>
         {:else}
@@ -249,6 +286,48 @@
     align-items: center;
     gap: 4px;
     padding: 3px 0;
+  }
+
+  /* untitled deleted lists: chevron column + tabs + top-right meta, no header row */
+  .merged {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 5px 0;
+  }
+
+  .chev-col {
+    flex-shrink: 0;
+    width: 22px;
+    height: 27px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .merged-tabs {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .merged-tabs .tab {
+    width: 100%;
+  }
+
+  .tab.summary {
+    color: var(--text-2);
+    font-weight: 500;
+  }
+
+  .merged-meta {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 27px;
   }
 
   .tab-entry .tab {
