@@ -4,6 +4,12 @@
   import { app } from '../ui/state.svelte'
   import ImportExport from './ImportExport.svelte'
   import SyncSection from './SyncSection.svelte'
+  import TabRow from './TabRow.svelte'
+
+  const demoTabs = [
+    { url: 'https://en.wikipedia.org/wiki/Forest', title: 'Forest - Wikipedia' },
+    { url: 'https://github.com/bphirsh/even-better-onetab', title: 'bphirsh/even-better-onetab: Store and restore your tabs' },
+  ]
 
   const update = <K extends keyof Options>(key: K, value: Options[K]) =>
     setOptions({ ...app.opts, [key]: value })
@@ -76,13 +82,18 @@
       </div>
       <div class="row">
         <div class="text">
-          <div class="label">Tab display</div>
+          <div class="label">Layout</div>
         </div>
         <select class="select" value={app.opts.itemDisplay} onchange={e => update('itemDisplay', e.currentTarget.value as Options['itemDisplay'])}>
           <option value="title-and-url">Title and domain</option>
           <option value="title">Title only</option>
           <option value="url">URL only</option>
         </select>
+      </div>
+      <div class="demo" aria-hidden="true">
+        {#each demoTabs as tab (tab.url)}
+          <TabRow {tab} display={app.opts.itemDisplay} hideFavicon={app.opts.hideFavicon} onOpen={() => {}} onRemove={() => {}} />
+        {/each}
       </div>
       <label class="row">
         <div class="text">
@@ -329,6 +340,15 @@
     padding: 12px 0;
     font-size: 12.5px;
     color: var(--text-2);
+  }
+
+  .demo {
+    margin: 2px 0 12px;
+    padding: 4px 4px 4px 0;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    pointer-events: none;
   }
 
   .support {
