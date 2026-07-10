@@ -60,7 +60,7 @@
       </div>
       <div class="row">
         <div class="text">
-          <div class="label">Density</div>
+          <div class="label">List layout</div>
         </div>
         <select class="select" value={app.opts.density} onchange={e => update('density', e.currentTarget.value as Options['density'])}>
           <option value="compact">Compact</option>
@@ -82,18 +82,13 @@
       </div>
       <div class="row">
         <div class="text">
-          <div class="label">Layout</div>
+          <div class="label">Tab display</div>
         </div>
         <select class="select" value={app.opts.itemDisplay} onchange={e => update('itemDisplay', e.currentTarget.value as Options['itemDisplay'])}>
           <option value="title-and-url">Title and domain</option>
           <option value="title">Title only</option>
           <option value="url">URL only</option>
         </select>
-      </div>
-      <div class="demo" aria-hidden="true">
-        {#each demoTabs as tab (tab.url)}
-          <TabRow {tab} display={app.opts.itemDisplay} hideFavicon={app.opts.hideFavicon} onOpen={() => {}} onRemove={() => {}} />
-        {/each}
       </div>
       <label class="row">
         <div class="text">
@@ -106,6 +101,11 @@
           onchange={e => update('hideFavicon', e.currentTarget.checked)}
         />
       </label>
+      <div class="demo" aria-hidden="true">
+        {#each demoTabs as tab (tab.url)}
+          <TabRow {tab} display={app.opts.itemDisplay} hideFavicon={app.opts.hideFavicon} onOpen={() => {}} onRemove={() => {}} />
+        {/each}
+      </div>
     </div>
   </section>
 
