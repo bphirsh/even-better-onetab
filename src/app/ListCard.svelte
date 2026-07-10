@@ -79,6 +79,12 @@
   }
 
   const toggleExpand = () => act({ type: 'list-update', id: list._id, patch: { expand: !list.expand } })
+
+  /** Clicking the header's empty space toggles expansion; interactive children keep their jobs. */
+  const onHeaderClick = (e: MouseEvent) => {
+    if ((e.target as Element).closest('button, input, .dropdown, .grip')) return
+    toggleExpand()
+  }
   const togglePin = () => {
     menuOpen = false
     act({ type: 'list-update', id: list._id, patch: { pinned: !list.pinned } })
@@ -180,7 +186,8 @@
 <svelte:window onclick={onWindowClick} />
 
 <section class="card" style:--list-accent={accent ?? 'transparent'} use:gateDragToHandle>
-  <header>
+  <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+  <header onclick={onHeaderClick}>
     {#if canDrag}
       <!-- not a <button>: the dnd library refuses to start drags from elements
            with a .value property, which buttons have -->
@@ -335,6 +342,7 @@
     align-items: center;
     gap: 6px;
     min-height: 36px;
+    cursor: pointer;
   }
 
   .grip {

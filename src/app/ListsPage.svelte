@@ -97,6 +97,9 @@
 
   .list-wrap {
     outline: none;
+    /* the dnd library inline-styles cursor: grab on every item; only the
+       grip should advertise dragging (!important beats the inline style) */
+    cursor: auto !important;
   }
 
   .empty {
