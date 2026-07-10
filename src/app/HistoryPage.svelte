@@ -33,8 +33,6 @@
   let collapsed = $state<Record<string, boolean>>({})
   const toggle = (key: string) => (collapsed[key] = !collapsed[key])
 
-  const label = (list: TabList) => list.title || `${list.tabs.length} tab${list.tabs.length === 1 ? '' : 's'}`
-
   const domain = (url: string) => {
     try {
       return new URL(url).hostname
@@ -138,20 +136,27 @@
               <span class="chevron" class:open={!collapsed[key]}><Icon name="chevron" size={14} /></span>
               <span class="color-dot" style:background={colorOf(entry.list.color) ?? 'var(--border)'}></span>
               <div class="text">
-                <div class="label" class:untitled={!entry.list.title}>{label(entry.list)}</div>
+                {#if entry.list.title}
+                  <div class="label">{entry.list.title}</div>
+                {/if}
                 <div class="desc">Deleted {timeAgo(entry.deletedAt)}</div>
               </div>
               <div class="actions">
-                <button class="btn" onclick={e => (e.stopPropagation(), recover(entry.list._id))}>
-                  <Icon name="restore" size={13} /> Recover
+                <button
+                  class="icon-btn"
+                  title="Recover list"
+                  aria-label="Recover list"
+                  onclick={e => (e.stopPropagation(), recover(entry.list._id))}
+                >
+                  <Icon name="restore" size={15} />
                 </button>
                 <button
-                  class="btn danger"
+                  class="icon-btn del"
                   title="Delete permanently"
                   aria-label="Delete permanently"
                   onclick={e => (e.stopPropagation(), deleteListForever(entry))}
                 >
-                  <Icon name="trash" size={13} />
+                  <Icon name="trash" size={15} />
                 </button>
               </div>
             </div>
@@ -169,17 +174,17 @@
                 <div class="desc">{domain(entry.tab.url)} · from “{entry.listTitle || 'Untitled'}” · {timeAgo(entry.deletedAt)}</div>
               </div>
               <div class="actions">
-                <button class="btn" onclick={() => openTab(entry.tab.url)}>Open</button>
-                <button class="btn" onclick={() => recoverTab(entry.id)}>
-                  <Icon name="restore" size={13} /> Recover
+                <button class="open-mini" onclick={() => openTab(entry.tab.url)}>Open</button>
+                <button class="icon-btn" title="Recover tab" aria-label="Recover tab" onclick={() => recoverTab(entry.id)}>
+                  <Icon name="restore" size={15} />
                 </button>
                 <button
-                  class="btn danger"
+                  class="icon-btn del"
                   title="Delete permanently"
                   aria-label="Delete permanently"
                   onclick={() => deleteTabForever(entry)}
                 >
-                  <Icon name="trash" size={13} />
+                  <Icon name="trash" size={15} />
                 </button>
               </div>
             </div>
@@ -300,10 +305,6 @@
     white-space: nowrap;
   }
 
-  .label.untitled {
-    color: var(--text-2);
-  }
-
   .desc {
     font-size: 12px;
     color: var(--text-3);
@@ -311,13 +312,25 @@
 
   .actions {
     display: flex;
-    gap: 6px;
+    align-items: center;
+    gap: 2px;
     flex-shrink: 0;
   }
 
-  .actions .btn {
-    padding: 5px 10px;
+  .actions .del:hover {
+    color: var(--danger);
+  }
+
+  .open-mini {
+    padding: 3px 10px;
+    border-radius: 6px;
     font-size: 12.5px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .open-mini:hover {
+    background: var(--accent-soft);
   }
 
   .tab-list {
