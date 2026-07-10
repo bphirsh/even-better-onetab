@@ -10,7 +10,14 @@ Store and restore your browser tabs in one click — a cleaner, faster OneTab al
 Chrome and Brave. If it's useful to you, consider
 [sponsoring the project](https://github.com/sponsors/bphirsh) ☕.
 
-![The Even Better OneTab list page](docs/screenshot.png)
+<p align="center">
+  <img src="docs/store/shot-1-lists-light.png" alt="The list page (light theme)" width="400" />
+  <img src="docs/store/shot-2-lists-dark.png" alt="The list page (dark theme)" width="400" />
+</p>
+<p align="center">
+  <img src="docs/store/shot-3-settings.png" alt="Settings" width="400" />
+  <img src="docs/store/shot-4-history.png" alt="Recently Deleted" width="400" />
+</p>
 
 This is a fork of [cnwangjie/better-onetab](https://github.com/cnwangjie/better-onetab)
 (unmaintained since ~2020), rebuilt from the ground up and modernized. The original was
