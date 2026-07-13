@@ -20,7 +20,7 @@ export type Message =
   | { type: 'trash-clear' }
   | { type: 'trash-put-all'; trash: TrashEntry[]; tabTrash: TrashTabEntry[] }
   | { type: 'open-lists' }
-  | { type: 'sync-setup'; token: string }
+  | { type: 'sync-setup'; token: string; gistId?: string }
   | { type: 'sync-push' }
   | { type: 'sync-pull' }
 

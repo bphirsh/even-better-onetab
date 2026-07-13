@@ -7,19 +7,26 @@
   import { act } from './actions'
 
   let tokenDraft = $state('')
+  let gistIdDraft = $state('')
   let busy = $state(false)
 
   const connected = $derived(Boolean(app.syncConfig.gistId && app.syncConfig.gistToken))
 
   const connect = async () => {
     const token = tokenDraft.trim()
+    const gistId = gistIdDraft.trim()
     if (!token) return
     busy = true
-    const { ok } = await act<{ gistId: string }>({ type: 'sync-setup', token })
+    const { ok } = await act<{ gistId: string }>({ type: 'sync-setup', token, gistId: gistId || undefined })
     busy = false
     if (ok) {
       tokenDraft = ''
-      toast('Sync connected — lists uploaded to your private gist')
+      gistIdDraft = ''
+      toast(
+        gistId
+          ? 'Sync connected — lists merged from your existing gist'
+          : 'Sync connected — lists uploaded to your private gist',
+      )
     }
   }
 
@@ -68,6 +75,10 @@
           with only the <code>gist</code> scope.
         </li>
         <li>Paste it here — a private gist is created for you.</li>
+        <li>
+          Already synced before (previous install or another computer)? Also paste that gist's id
+          to reconnect to it and pull your lists in.
+        </li>
       </ol>
       <div class="connect">
         <input
@@ -75,6 +86,13 @@
           type="password"
           placeholder="GitHub token (ghp_… or github_pat_…)"
           bind:value={tokenDraft}
+          onkeydown={e => e.key === 'Enter' && connect()}
+        />
+        <input
+          class="text-input"
+          type="text"
+          placeholder="Existing gist id (optional — from gist.github.com)"
+          bind:value={gistIdDraft}
           onkeydown={e => e.key === 'Enter' && connect()}
         />
         <button class="btn primary" disabled={busy || !tokenDraft.trim()} onclick={connect}>Connect</button>
@@ -189,8 +207,13 @@
 
   .connect {
     display: flex;
+    flex-direction: column;
     gap: 8px;
     padding-bottom: 14px;
+  }
+
+  .connect .btn {
+    align-self: flex-end;
   }
 
   .row {

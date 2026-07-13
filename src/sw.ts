@@ -142,7 +142,7 @@ const handleMessage = async (message: Message, sender: chrome.runtime.MessageSen
     case 'open-lists':
       return openTabLists()
     case 'sync-setup':
-      return setupSync(message.token)
+      return setupSync(message.token, message.gistId)
     case 'sync-push':
       return pushNow()
     case 'sync-pull':

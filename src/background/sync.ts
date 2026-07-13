@@ -38,8 +38,23 @@ export const pushNow = async () => {
   }
 }
 
-/** Creates the private gist and enables sync; returns the gist id. */
-export const setupSync = async (token: string) => {
+/**
+ * Enables sync. Without a gist id it creates a fresh private gist; with one
+ * (e.g. from a previous install) it adopts that gist and merges its lists in.
+ */
+export const setupSync = async (token: string, existingGistId?: string) => {
+  const cleaned = existingGistId?.trim().replace(/^https:\/\/gist\.github\.com\/(?:[^/]+\/)?/, '')
+  if (cleaned) {
+    const snapshot = await new GistProvider(token, cleaned).pull()
+    if (!snapshot) throw new Error('That gist has no Even Better OneTab sync data')
+    await setSyncConfig({ enabled: true, gistToken: token, gistId: cleaned })
+    const [localLists, localTombstones] = await Promise.all([getLists(), getTombstones()])
+    const merged = mergeLists(localLists, localTombstones, parseSnapshot(snapshot), parseTombstones(snapshot))
+    await setTombstones(merged.tombstones)
+    await replaceLists(merged.lists, true)
+    await setSyncState({ lastPullAt: Date.now(), error: null })
+    return { gistId: cleaned }
+  }
   const [lists, tombstones] = await Promise.all([getLists(), getTombstones()])
   const gistId = await createSyncGist(token, createSnapshot(lists, tombstones))
   await setSyncConfig({ enabled: true, gistToken: token, gistId })
