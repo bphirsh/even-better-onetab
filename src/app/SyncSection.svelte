@@ -141,12 +141,12 @@
 
       <div class="row">
         <div class="text">
-          <div class="label">Your gist</div>
+          <div class="label">Mobile viewer</div>
           <div class="desc">
-            <a href={`https://gist.github.com/${app.syncConfig.gistId}`} target="_blank" rel="noreferrer"
-              ><code>{app.syncConfig.gistId}</code></a
-            >
-            — this id (plus your token) reconnects sync on another computer or a reinstall.
+            Open
+            <a href="https://bphirsh.github.io/even-better-onetab/viewer/" target="_blank" rel="noreferrer">the viewer page</a>
+            on your phone and paste your token and gist id once — your lists are readable anywhere.
+            The same two values reconnect sync on another computer or a reinstall.
           </div>
         </div>
         <div class="btn-group">
@@ -156,17 +156,6 @@
           <button class="btn" title="Copy the gist id" onclick={() => copy('Gist id', app.syncConfig.gistId)}>
             <Icon name="copy" size={13} /> Gist id
           </button>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="text">
-          <div class="label">Mobile viewer</div>
-          <div class="desc">
-            Open
-            <a href="https://bphirsh.github.io/even-better-onetab/viewer/" target="_blank" rel="noreferrer">the viewer page</a>
-            on your phone and paste your token and gist id once — your lists are readable anywhere.
-          </div>
         </div>
       </div>
 
