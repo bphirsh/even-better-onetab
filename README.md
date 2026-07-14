@@ -38,8 +38,10 @@ this rewrite is Svelte 5 + TypeScript + Vite on Manifest V3.
   resurrecting. The gist's revision history doubles as backup history.
 - **Mobile access** — a static viewer page reads the gist so you can browse and open your saved
   tabs from a phone (extensions don't run on mobile browsers).
-- **Tab groups survive** — stored tabs remember their tab group (name + color) and are
-  re-grouped on restore.
+- **Tab groups are first-class** — storing tabs from a named group files them into a list
+  named and colored after the group (created on the fly, appended to thereafter), and
+  restoring puts tabs back into that group — joining it if it's already open. A right-click
+  "Store this tab's group" action stores a whole group at once.
 - **Undo** — deleting a list or restore-and-remove shows an Undo toast; misclicks aren't fatal.
 - **Copy as Markdown** — turn any list into `- [title](url)` lines for pasting into notes.
 - **Configurable toolbar button** — clicking the extension icon can open the popup, store

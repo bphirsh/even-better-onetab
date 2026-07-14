@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Even Better OneTab",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Store and restore your tabs in one click — a fast, private OneTab alternative with sync and a mobile viewer.",
   "icons": {
     "16": "icons/icon_16.png",

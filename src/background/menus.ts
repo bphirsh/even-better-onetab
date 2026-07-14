@@ -6,6 +6,7 @@ import {
   storeLeftTabs,
   storeRightTabs,
   storeSelectedTabs,
+  storeTabGroup,
   storeTwoSideTabs,
 } from './tabs'
 
@@ -41,6 +42,7 @@ export const rebuildMenus = async () => {
 
   await create({ id: 'SHOW_TAB_LIST', title: 'Open Even Better OneTab', contexts })
   await create({ id: 'STORE_SELECTED', title: 'Store selected tabs', contexts })
+  await create({ id: 'STORE_GROUP', title: "Store this tab's group", contexts })
   await create({ id: 'STORE', title: 'Store tabs…', contexts })
   await create({ id: 'STORE.STORE_ALL', parentId: 'STORE', title: 'All tabs in this window', contexts })
   await create({ id: 'STORE.STORE_ALL_WINDOWS', parentId: 'STORE', title: 'All tabs in all windows', contexts })
@@ -59,10 +61,11 @@ export const rebuildMenus = async () => {
   }
 }
 
-export const handleMenuClick = (info: chrome.contextMenus.OnClickData) => {
+export const handleMenuClick = (info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) => {
   const menuItemId = String(info.menuItemId)
   const [path, listId] = menuItemId.split('|')
   const action = path.split('.').pop()!
+  if (action === 'STORE_GROUP') return storeTabGroup(tab)
   const handler = actions[action]
   if (handler) return handler(listId)
 }

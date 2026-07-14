@@ -1,5 +1,6 @@
 <script lang="ts">
   import { dndzone, type DndEvent } from 'svelte-dnd-action'
+  import { placeTabsInGroup } from '../core/grouping'
   import type { TabItem, TabList } from '../core/types'
   import { COLOR_NAMES, LIST_COLORS, colorOf } from '../ui/colors'
   import Icon from '../ui/Icon.svelte'
@@ -156,18 +157,28 @@
     toast('Copied as Markdown')
   }
 
-  const openTab = (index: number) => {
+  const openTab = async (index: number) => {
     const tab = list.tabs[index]
     if (!tab) return
     // single tabs follow the same "Open tabs in" setting as list restores
+    let createdId: number | undefined
+    let createdWindowId: number | undefined
     if (app.opts.restorePosition === 'new-window') {
-      chrome.windows.create({ url: tab.url, focused: app.opts.focusOpenedTab })
+      const win = await chrome.windows.create({ url: tab.url, focused: app.opts.focusOpenedTab })
+      createdId = win.tabs?.[0]?.id
+      createdWindowId = win.id
     } else {
-      chrome.tabs.create({
+      const created = await chrome.tabs.create({
         url: tab.url,
         active: app.opts.focusOpenedTab,
         ...(app.opts.restorePosition === 'start' ? { index: 0 } : {}),
       })
+      createdId = created.id
+      createdWindowId = created.windowId
+    }
+    // a tab stored from a group goes back into that group (join it if open)
+    if (tab.group && createdId != null) {
+      await placeTabsInGroup([createdId], $state.snapshot(tab.group), createdWindowId)
     }
     if (app.opts.itemClickAction === 'open-and-remove') {
       const tabs = list.tabs.filter((_, i) => i !== index)

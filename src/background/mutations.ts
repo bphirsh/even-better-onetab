@@ -197,3 +197,24 @@ export const appendTabsToList = async (listId: string | undefined, tabs: TabList
     touch(list)
   })
 }
+
+/**
+ * Stores tabs from a named tab group into "its" list: the list whose title
+ * matches the group name (case-insensitive). Appends and moves the list to the
+ * top; creates the list (titled and colored after the group) if it's missing.
+ */
+export const appendTabsToGroupList = async (title: string, listColor: string, tabs: TabList['tabs']) => {
+  const opts = await getOptions()
+  return mutateLists(lists => {
+    const needle = title.trim().toLowerCase()
+    const index = lists.findIndex(l => l.title.trim().toLowerCase() === needle)
+    if (index < 0) {
+      lists.unshift(createNewTabList({ title, color: listColor, tabs, pinned: opts.pinNewList }))
+      return
+    }
+    const [list] = lists.splice(index, 1)
+    list.tabs.push(...tabs)
+    touch(list)
+    lists.unshift(list)
+  })
+}

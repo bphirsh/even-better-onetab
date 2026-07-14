@@ -59,8 +59,8 @@ chrome.runtime.onStartup.addListener(() => {
   autoPullMerge()
 })
 
-chrome.contextMenus.onClicked.addListener(info => {
-  handleMenuClick(info)
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  handleMenuClick(info, tab)
 })
 
 const commands: Record<string, () => Promise<unknown>> = {
