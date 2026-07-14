@@ -5,6 +5,7 @@ import type { SyncConfig, SyncState, TabItem, TabList, Tombstone, TrashEntry, Tr
 // Storage keys are kept identical to v1 so existing user data survives the upgrade.
 const LISTS_KEY = 'lists'
 const OPTS_KEY = 'opts'
+const OPTS_UPDATED_KEY = 'optsUpdatedAt'
 const SYNC_CONFIG_KEY = 'syncConfig'
 const SYNC_STATE_KEY = 'syncState'
 const TOMBSTONES_KEY = 'syncTombstones'
@@ -47,11 +48,16 @@ export const getOptions = async (): Promise<Options> => {
   return { ...DEFAULT_OPTIONS, ...(opts ?? {}) }
 }
 
-export const setOptions = async (opts: Options) => {
+export const setOptions = async (opts: Options, updatedAt = Date.now()) => {
   const picked = Object.fromEntries(
     Object.keys(DEFAULT_OPTIONS).map(key => [key, opts[key as keyof Options]]),
   )
-  await chrome.storage.local.set({ [OPTS_KEY]: picked })
+  await chrome.storage.local.set({ [OPTS_KEY]: picked, [OPTS_UPDATED_KEY]: updatedAt })
+}
+
+export const getOptsUpdatedAt = async (): Promise<number> => {
+  const { [OPTS_UPDATED_KEY]: at } = await chrome.storage.local.get(OPTS_UPDATED_KEY)
+  return typeof at === 'number' ? at : 0
 }
 
 export const getSyncConfig = async (): Promise<SyncConfig> => {

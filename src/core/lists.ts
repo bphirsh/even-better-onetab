@@ -43,11 +43,16 @@ export const validateList = (list: unknown): list is Partial<TabList> & { tabs: 
 /** Keep only persisted properties (drops transient UI state like the old `titleEditing`). */
 export const normalizeList = (list: Partial<TabList>): TabList => createNewTabList(list)
 
-export const createSnapshot = (lists: TabList[], tombstones: Tombstone[] = []): Snapshot => ({
+export const createSnapshot = (
+  lists: TabList[],
+  tombstones: Tombstone[] = [],
+  settings?: { opts: Record<string, unknown>; optsUpdatedAt: number },
+): Snapshot => ({
   format: 'even-better-onetab/1',
   exportedAt: Date.now(),
   lists: lists.map(normalizeList),
   tombstones,
+  ...(settings ? { opts: settings.opts, optsUpdatedAt: settings.optsUpdatedAt } : {}),
 })
 
 /** Accepts a v2 snapshot or a bare v1 lists array; returns lists or throws. */

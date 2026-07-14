@@ -102,7 +102,7 @@
         <div class="text">
           <div class="label">Automatic sync</div>
           <div class="desc">
-            Uploads to
+            Uploads your lists and settings to
             <a href={`https://gist.github.com/${app.syncConfig.gistId}`} target="_blank" rel="noreferrer">your private gist</a>
             shortly after every change, and merges from it on browser startup. Newer edits win;
             deletions sync too.

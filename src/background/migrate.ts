@@ -1,5 +1,5 @@
 import { BROWSER_ACTIONS, DEFAULT_OPTIONS, type Options } from '../core/options'
-import { getLists, setOptions } from '../core/storage'
+import { getLists, getOptsUpdatedAt, setOptions } from '../core/storage'
 import { replaceLists } from './mutations'
 
 /**
@@ -25,7 +25,9 @@ export const migrateFromV1 = async () => {
     if (migrated.itemClickAction !== 'open-and-remove' && migrated.itemClickAction !== 'open') {
       migrated.itemClickAction = DEFAULT_OPTIONS.itemClickAction
     }
-    await setOptions(migrated)
+    // keep the existing settings-sync timestamp — re-normalizing on update
+    // must not make this device's settings look freshly edited
+    await setOptions(migrated, (await getOptsUpdatedAt()) || Date.now())
   }
 
   // normalize lists once (drops transient props like titleEditing)
@@ -33,7 +35,8 @@ export const migrateFromV1 = async () => {
   if (lists.length > 0) await replaceLists(lists, false)
 
   // v1 leftovers: op-log for the dead boss sync service, timestamps, etc.
-  const stale = ['ops', 'opsUpdatedAt', 'listsUpdatedAt', 'optsUpdatedAt', 'conflict'].filter(k => k in all)
+  // ('optsUpdatedAt' is NOT stale — v2 reuses that key for settings sync)
+  const stale = ['ops', 'opsUpdatedAt', 'listsUpdatedAt', 'conflict'].filter(k => k in all)
   if (stale.length > 0) await chrome.storage.local.remove(stale)
   await chrome.storage.sync.remove('token').catch(() => {})
 }

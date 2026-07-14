@@ -1,14 +1,19 @@
 import { createSnapshot, parseSnapshot, parseTombstones } from '../core/lists'
+import { DEFAULT_OPTIONS, type Options } from '../core/options'
 import {
   getLists,
+  getOptions,
+  getOptsUpdatedAt,
   getSyncConfig,
   getTombstones,
+  setOptions,
   setSyncConfig,
   setSyncState,
   setTombstones,
 } from '../core/storage'
 import { GistProvider, createSyncGist } from '../core/sync/gist'
 import { mergeLists } from '../core/sync/merge'
+import type { Snapshot } from '../core/types'
 import { replaceLists } from './mutations'
 
 export const SYNC_ALARM = 'sync-push'
@@ -25,12 +30,21 @@ export const schedulePush = () => {
   })
 }
 
+const buildSnapshot = async (): Promise<Snapshot> => {
+  const [lists, tombstones, opts, optsUpdatedAt] = await Promise.all([
+    getLists(),
+    getTombstones(),
+    getOptions(),
+    getOptsUpdatedAt(),
+  ])
+  return createSnapshot(lists, tombstones, { opts: { ...opts }, optsUpdatedAt })
+}
+
 export const pushNow = async () => {
   const config = await getSyncConfig()
   if (!config.enabled || !config.gistToken || !config.gistId) return
   try {
-    const [lists, tombstones] = await Promise.all([getLists(), getTombstones()])
-    await new GistProvider(config.gistToken, config.gistId).push(createSnapshot(lists, tombstones))
+    await new GistProvider(config.gistToken, config.gistId).push(await buildSnapshot())
     await setSyncState({ lastPushAt: Date.now(), error: null })
   } catch (e) {
     await setSyncState({ error: e instanceof Error ? e.message : String(e) })
@@ -38,9 +52,27 @@ export const pushNow = async () => {
   }
 }
 
+/** Merges a remote snapshot into local state: lists, tombstones, and settings. */
+const applyRemoteSnapshot = async (snapshot: Snapshot) => {
+  const [localLists, localTombstones] = await Promise.all([getLists(), getTombstones()])
+  const merged = mergeLists(localLists, localTombstones, parseSnapshot(snapshot), parseTombstones(snapshot))
+  await setTombstones(merged.tombstones)
+  await replaceLists(merged.lists, true)
+  // settings: last writer wins, keeping the remote's timestamp so the winner is stable
+  if (
+    snapshot.opts &&
+    typeof snapshot.opts === 'object' &&
+    typeof snapshot.optsUpdatedAt === 'number' &&
+    snapshot.optsUpdatedAt > (await getOptsUpdatedAt())
+  ) {
+    await setOptions({ ...DEFAULT_OPTIONS, ...snapshot.opts } as Options, snapshot.optsUpdatedAt)
+  }
+  return merged
+}
+
 /**
  * Enables sync. Without a gist id it creates a fresh private gist; with one
- * (e.g. from a previous install) it adopts that gist and merges its lists in.
+ * (e.g. from a previous install) it adopts that gist and merges it in.
  */
 export const setupSync = async (token: string, existingGistId?: string) => {
   const cleaned = existingGistId?.trim().replace(/^https:\/\/gist\.github\.com\/(?:[^/]+\/)?/, '')
@@ -48,25 +80,21 @@ export const setupSync = async (token: string, existingGistId?: string) => {
     const snapshot = await new GistProvider(token, cleaned).pull()
     if (!snapshot) throw new Error('That gist has no Even Better OneTab sync data')
     await setSyncConfig({ enabled: true, gistToken: token, gistId: cleaned })
-    const [localLists, localTombstones] = await Promise.all([getLists(), getTombstones()])
-    const merged = mergeLists(localLists, localTombstones, parseSnapshot(snapshot), parseTombstones(snapshot))
-    await setTombstones(merged.tombstones)
-    await replaceLists(merged.lists, true)
+    await applyRemoteSnapshot(snapshot)
     await setSyncState({ lastPullAt: Date.now(), error: null })
     return { gistId: cleaned }
   }
-  const [lists, tombstones] = await Promise.all([getLists(), getTombstones()])
-  const gistId = await createSyncGist(token, createSnapshot(lists, tombstones))
+  const gistId = await createSyncGist(token, await buildSnapshot())
   await setSyncConfig({ enabled: true, gistToken: token, gistId })
   await setSyncState({ lastPushAt: Date.now(), error: null })
   return { gistId }
 }
 
 /**
- * Pulls the remote snapshot and merges it into the local lists: newer
- * updatedAt wins per list, one-sided lists are kept, tombstones from either
- * device suppress deleted lists. The merged result is scheduled for push so
- * the gist converges too.
+ * Pulls the remote snapshot and merges it in: newer updatedAt wins per list,
+ * one-sided lists are kept, tombstones from either device suppress deleted
+ * lists, and settings follow the newer optsUpdatedAt. The merged result is
+ * scheduled for push so the gist converges too.
  */
 export const pullMerge = async () => {
   const config = await getSyncConfig()
@@ -74,10 +102,7 @@ export const pullMerge = async () => {
   try {
     const snapshot = await new GistProvider(config.gistToken, config.gistId).pull()
     if (!snapshot) throw new Error('No sync data found in the gist')
-    const [localLists, localTombstones] = await Promise.all([getLists(), getTombstones()])
-    const merged = mergeLists(localLists, localTombstones, parseSnapshot(snapshot), parseTombstones(snapshot))
-    await setTombstones(merged.tombstones)
-    await replaceLists(merged.lists, true)
+    const merged = await applyRemoteSnapshot(snapshot)
     await setSyncState({ lastPullAt: Date.now(), error: null })
     return { count: merged.lists.length }
   } catch (e) {

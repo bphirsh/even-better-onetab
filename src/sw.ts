@@ -16,7 +16,7 @@ import {
   restoreTabFromTrash,
   updateList,
 } from './background/mutations'
-import { SYNC_ALARM, autoPullMerge, pullMerge, pushNow, setupSync } from './background/sync'
+import { SYNC_ALARM, autoPullMerge, pullMerge, pushNow, schedulePush, setupSync } from './background/sync'
 import {
   openTabLists,
   restoreLatestList,
@@ -87,7 +87,11 @@ chrome.storage.onChanged.addListener((changes, area) => {
     clearTimeout(menuRebuildTimer)
     menuRebuildTimer = setTimeout(rebuildMenus, 2000)
   }
-  if (changes.opts) applyBrowserAction()
+  if (changes.opts) {
+    applyBrowserAction()
+    // settings sync: option edits ride the same debounced upload as list edits
+    schedulePush()
+  }
 })
 
 const storeHandlers = {

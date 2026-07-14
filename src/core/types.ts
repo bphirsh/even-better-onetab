@@ -53,6 +53,9 @@ export interface Snapshot {
   exportedAt: number
   lists: TabList[]
   tombstones?: Tombstone[]
+  /** Synced settings (last-writer-wins by optsUpdatedAt). */
+  opts?: Record<string, unknown>
+  optsUpdatedAt?: number
 }
 
 export interface SyncConfig {
