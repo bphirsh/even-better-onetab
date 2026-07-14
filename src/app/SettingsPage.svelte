@@ -160,6 +160,20 @@
           <option value="open">Opens it and keeps it in the list</option>
         </select>
       </div>
+      <div class="row">
+        <div class="text">
+          <div class="label">Opening a list</div>
+          <div class="desc">Pinned lists are never removed automatically.</div>
+        </div>
+        <select
+          class="select"
+          value={app.opts.openListAction}
+          onchange={e => update('openListAction', e.currentTarget.value as Options['openListAction'])}
+        >
+          <option value="open-and-remove">Opens it and removes the list</option>
+          <option value="open">Opens it and keeps the list</option>
+        </select>
+      </div>
       <label class="row">
         <div class="text">
           <div class="label">Switch to the opened tab</div>

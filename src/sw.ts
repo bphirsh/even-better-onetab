@@ -118,7 +118,10 @@ const handleMessage = async (message: Message, sender: chrome.runtime.MessageSen
       const list = lists.find(l => l._id === message.id)
       if (!list) throw new Error('List not found')
       await restoreList(list, { windowId: sender.tab?.windowId, newWindow: message.newWindow })
-      if (message.remove) await removeList(message.id)
+      // callers that don't decide (e.g. the popup) fall back to the option
+      const opts = await getOptions()
+      const remove = message.remove ?? (opts.openListAction === 'open-and-remove' && !list.pinned)
+      if (remove) await removeList(message.id)
       return
     }
     case 'trash-restore':

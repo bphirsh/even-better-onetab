@@ -125,15 +125,18 @@
     fn: () => act({ type: 'list-add', list: copy, index }),
   })
 
-  const restore = async (newWindow = false, remove = false) => {
+  const restore = async (newWindow = false, removeArg?: boolean) => {
     closeMenu()
+    // explicit menu choice wins; otherwise the "Opening a list" option decides
+    // (pinned lists are never auto-removed)
+    const remove = removeArg ?? (app.opts.openListAction === 'open-and-remove' && !list.pinned)
     if (!remove) {
-      act({ type: 'restore-list', id: list._id, newWindow })
+      act({ type: 'restore-list', id: list._id, newWindow, remove: false })
       return
     }
     const captured = captureForUndo()
     const { ok } = await act({ type: 'restore-list', id: list._id, newWindow, remove: true })
-    if (ok) toast('List restored & removed', 'info', undoAction(captured))
+    if (ok) toast('List opened & removed', 'info', undoAction(captured))
   }
 
   const removeListNow = async () => {

@@ -11,6 +11,8 @@ export interface Options {
   browserAction: BrowserAction
   /** What clicking a stored tab in the list page does. */
   itemClickAction: 'open-and-remove' | 'open'
+  /** What opening a whole list does with the list afterwards (pinned lists are never auto-removed). */
+  openListAction: 'open-and-remove' | 'open'
   /** Switch to the tab a click opens (off = open it in the background). */
   focusOpenedTab: boolean
   itemDisplay: 'title-and-url' | 'title' | 'url'
@@ -49,6 +51,7 @@ export const DEFAULT_OPTIONS: Options = {
   pinnedPosition: 'top',
   browserAction: 'popup',
   itemClickAction: 'open-and-remove',
+  openListAction: 'open',
   focusOpenedTab: true,
   itemDisplay: 'title-and-url',
   hideFavicon: false,
