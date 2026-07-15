@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { cubicOut } from 'svelte/easing'
+  import { fly } from 'svelte/transition'
   import { app, applyTheme, initState } from '../ui/state.svelte'
   import { timeAgo } from '../ui/time'
   import Header from './Header.svelte'
@@ -39,13 +41,17 @@
 <div class="shell" class:comfortable={app.opts.density === 'comfortable'}>
   <Header {route} />
   <main>
-    {#if route === 'settings'}
-      <SettingsPage />
-    {:else if route === 'history'}
-      <HistoryPage />
-    {:else}
-      <ListsPage />
-    {/if}
+    {#key route}
+      <div class="route" in:fly={{ y: 8, duration: 170, easing: cubicOut }}>
+        {#if route === 'settings'}
+          <SettingsPage />
+        {:else if route === 'history'}
+          <HistoryPage />
+        {:else}
+          <ListsPage />
+        {/if}
+      </div>
+    {/key}
   </main>
 </div>
 

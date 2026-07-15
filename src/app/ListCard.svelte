@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { flip } from 'svelte/animate'
   import { dndzone, type DndEvent } from 'svelte-dnd-action'
   import { placeTabsInGroup } from '../core/grouping'
   import type { TabItem, TabList } from '../core/types'
@@ -144,8 +145,13 @@
     closeMenu()
     if (app.opts.alertRemoveList && !confirm(`Delete “${list.title || `${list.tabs.length} tabs`}”?`)) return
     const captured = captureForUndo()
+    // fade the card out first, then mutate — the dnd flip then closes the gap.
+    // (a Svelte out: transition here would fight svelte-dnd-action's DOM)
+    leaving = true
+    await new Promise(r => setTimeout(r, 150))
     const { ok } = await act({ type: 'list-remove', id: list._id })
     if (ok) toast('List deleted', 'info', undoAction(captured))
+    else leaving = false
   }
 
   const copyMarkdown = async () => {
@@ -186,14 +192,23 @@
     }
   }
 
-  const removeTab = (index: number) => {
+  const removeTab = async (index: number) => {
     const tab = list.tabs[index]
     if (!tab) return
+    // fade the row first (same reasoning as list delete), then remove
+    const id = tabItems[index]?.id
+    if (id) {
+      leavingTabs.add(id)
+      leavingTabs = new Set(leavingTabs)
+      await new Promise(r => setTimeout(r, 130))
+    }
     // explicit deletion goes through the SW so the tab lands in History's tab trash
     act({ type: 'tab-remove', listId: list._id, index, url: tab.url })
   }
 
   const accent = $derived(colorOf(list.color))
+  let leaving = $state(false)
+  let leavingTabs = $state(new Set<string>())
 
   /**
    * The list dndzone stays enabled, but only the grip may start a list drag:
@@ -218,7 +233,7 @@
 
 <svelte:window onclick={onWindowClick} />
 
-<section class="card" style:--list-accent={accent ?? 'transparent'} use:gateDragToHandle>
+<section class="card" class:leaving style:--list-accent={accent ?? 'transparent'} use:gateDragToHandle>
   <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
   <header onclick={onHeaderClick}>
     {#if canDrag}
@@ -357,13 +372,15 @@
       onfinalize={onFinalize}
     >
       {#each tabItems as item, index (item.id)}
-        <TabRow
-          tab={item.tab}
-          display={app.opts.itemDisplay}
-          hideFavicon={app.opts.hideFavicon}
-          onOpen={() => openTab(index)}
-          onRemove={() => removeTab(index)}
-        />
+        <div class="tab-wrap" class:leaving={leavingTabs.has(item.id)} animate:flip={{ duration: 120 }}>
+          <TabRow
+            tab={item.tab}
+            display={app.opts.itemDisplay}
+            hideFavicon={app.opts.hideFavicon}
+            onOpen={() => openTab(index)}
+            onRemove={() => removeTab(index)}
+          />
+        </div>
       {/each}
     </div>
   {/if}
@@ -377,6 +394,22 @@
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     padding: 6px 10px 8px;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+
+  .card.leaving {
+    opacity: 0;
+    transform: scale(0.98);
+    pointer-events: none;
+  }
+
+  .tab-wrap {
+    transition: opacity 0.13s ease;
+  }
+
+  .tab-wrap.leaving {
+    opacity: 0;
+    pointer-events: none;
   }
 
   header {

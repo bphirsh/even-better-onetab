@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { flip } from 'svelte/animate'
   import { dndzone, type DndEvent } from 'svelte-dnd-action'
   import type { TabList } from '../core/types'
   import Icon from '../ui/Icon.svelte'
@@ -7,6 +8,9 @@
   import { startAutoScroll, stopAutoScroll } from './dnd-autoscroll'
   import { filters, filtersActive } from './filters.svelte'
   import ListCard from './ListCard.svelte'
+
+  // keep the FLIP reflow in step with the dnd library's own flip timing
+  const flipMs = 150
 
   interface ListItem {
     id: string
@@ -69,7 +73,7 @@
       onfinalize={onFinalize}
     >
       {#each dndItems as item (item.id)}
-        <div class="list-wrap">
+        <div class="list-wrap" animate:flip={{ duration: flipMs }}>
           <ListCard list={item.list} canDrag={canReorder} />
         </div>
       {/each}
