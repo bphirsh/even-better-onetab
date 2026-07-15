@@ -183,14 +183,13 @@ export const replaceLists = (lists: TabList[], sync = true) =>
   mutateLists(() => lists.map(normalizeList), sync)
 
 export const appendTabsToList = async (listId: string | undefined, tabs: TabList['tabs']) => {
-  const opts = await getOptions()
   if (listId == null) {
-    return addList({ tabs, pinned: opts.pinNewList })
+    return addList({ tabs })
   }
   return mutateLists(lists => {
     const list = lists.find(l => l._id === listId)
     if (!list) {
-      lists.unshift(createNewTabList({ tabs, pinned: opts.pinNewList }))
+      lists.unshift(createNewTabList({ tabs }))
       return
     }
     list.tabs.push(...tabs)
@@ -209,7 +208,7 @@ export const appendTabsToGroupList = async (title: string, listColor: string, ta
     const needle = title.trim().toLowerCase()
     const index = lists.findIndex(l => l.title.trim().toLowerCase() === needle)
     if (index < 0) {
-      lists.unshift(createNewTabList({ title, color: listColor, tabs, pinned: opts.pinNewList }))
+      lists.unshift(createNewTabList({ title, color: listColor, tabs, pinned: opts.pinGroupList }))
       return
     }
     const [list] = lists.splice(index, 1)

@@ -21,8 +21,8 @@ export interface Options {
   addHistory: boolean
   /** Don't store pinned browser tabs. */
   ignorePinned: boolean
-  /** Pin newly created lists. */
-  pinNewList: boolean
+  /** Pin lists created from a tab group. */
+  pinGroupList: boolean
   /** Show context menu items on pages. */
   pageContext: boolean
   /** Show context menu on all elements (links, images, ...) not just the page. */
@@ -57,7 +57,7 @@ export const DEFAULT_OPTIONS: Options = {
   hideFavicon: false,
   addHistory: true,
   ignorePinned: false,
-  pinNewList: false,
+  pinGroupList: false,
   pageContext: true,
   allContext: false,
   alertRemoveList: false,

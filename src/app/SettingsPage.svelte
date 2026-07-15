@@ -11,6 +11,8 @@
     { url: 'https://brianhirsh.com', title: 'Brian Hirsh', favIconUrl: 'https://brianhirsh.com/favicon-32x32.png' },
   ]
 
+  const version = chrome.runtime.getManifest().version
+
   const update = <K extends keyof Options>(key: K, value: Options[K]) =>
     setOptions({ ...app.opts, [key]: value })
 
@@ -25,7 +27,7 @@
     { key: 'excludeIllegalURL', label: 'Skip browser-internal pages', desc: 'about:, chrome:, file: and similar URLs are not stored.' },
     { key: 'removeDuplicate', label: 'Remove duplicate tabs within a list' },
     { key: 'addHistory', label: 'Keep stored tabs in browser history', desc: 'Stored tabs stay findable from the address bar.' },
-    { key: 'pinNewList', label: 'Pin new lists', desc: 'Pinned lists are protected from automatic removal (e.g. by the restore-latest shortcut).' },
+    { key: 'pinGroupList', label: 'Pin lists made from tab groups', desc: 'Pinned lists aren’t removed automatically.' },
   ]
 
   const menuToggles: ToggleDef[] = [
@@ -287,6 +289,7 @@
       ☕ Buy me a coffee
     </a>
   </p>
+  <p class="version">Even Better OneTab v{version}</p>
 </div>
 
 <style>
@@ -375,6 +378,13 @@
     font-size: 12.5px;
     color: var(--text-3);
     margin: 4px 0 0;
+  }
+
+  .version {
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--text-3);
+    margin: 16px 0 0;
   }
 
   .coffee {
