@@ -27,7 +27,7 @@
     { key: 'excludeIllegalURL', label: 'Skip browser-internal pages', desc: 'about:, chrome:, file: and similar URLs are not stored.' },
     { key: 'removeDuplicate', label: 'Remove duplicate tabs within a list' },
     { key: 'addHistory', label: 'Keep stored tabs in browser history', desc: 'Stored tabs stay findable from the address bar.' },
-    { key: 'pinGroupList', label: 'Pin lists made from tab groups', desc: 'Pinned lists aren’t removed automatically.' },
+    { key: 'pinGroupList', label: 'Pin lists made from tab groups', desc: 'Pinned lists aren’t removed when opened.' },
   ]
 
   const menuToggles: ToggleDef[] = [
@@ -165,7 +165,7 @@
       <div class="row">
         <div class="text">
           <div class="label">Opening a list</div>
-          <div class="desc">Pinned lists are never removed automatically.</div>
+          <div class="desc">Pinned lists aren’t removed when opened.</div>
         </div>
         <select
           class="select"

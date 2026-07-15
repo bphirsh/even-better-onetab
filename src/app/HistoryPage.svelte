@@ -10,7 +10,8 @@
 
   const feed = $derived(
     [
-      ...app.trash.map(entry => ({ kind: 'list', entry }) as FeedEntry),
+      // guard against any legacy 0-tab list entries slipping through
+      ...app.trash.filter(t => t.list.tabs.length > 0).map(entry => ({ kind: 'list', entry }) as FeedEntry),
       ...app.tabTrash.map(entry => ({ kind: 'tab', entry }) as FeedEntry),
     ].sort((a, b) => b.entry.deletedAt - a.entry.deletedAt),
   )

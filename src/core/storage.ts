@@ -118,11 +118,14 @@ export const setTrash = async (trash: TrashEntry[]) => {
 }
 
 export const addToTrash = async (lists: TabList[]) => {
-  if (lists.length === 0) return
+  // never trash empty husks — a list emptied by removing its last tab isn't
+  // worth recovering (and would show as a 0-tab entry in History)
+  const recoverable = lists.filter(l => l.tabs.length > 0)
+  if (recoverable.length === 0) return
   if ((await getTrashTtl()) === 0) return
   const now = Date.now()
   const existing = await getTrash()
-  await setTrash([...lists.map(list => ({ list, deletedAt: now })), ...existing])
+  await setTrash([...recoverable.map(list => ({ list, deletedAt: now })), ...existing])
 }
 
 export const getTabTrash = async (): Promise<TrashTabEntry[]> => {

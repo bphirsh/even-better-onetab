@@ -261,6 +261,15 @@
 
     <div class="actions">
       <button class="open-btn" title="Open all tabs in this list" onclick={() => restore()}>Open</button>
+      <button
+        class="icon-btn pin-btn"
+        class:pinned={list.pinned}
+        title={list.pinned ? 'Unpin list' : 'Pin list'}
+        aria-label={list.pinned ? 'Unpin list' : 'Pin list'}
+        onclick={togglePin}
+      >
+        <Icon name="pin" size={15} />
+      </button>
       <button class="icon-btn delete-btn" title="Delete list" aria-label="Delete list" onclick={removeListNow}>
         <Icon name="trash" size={15} />
       </button>
@@ -481,6 +490,14 @@
 
   .delete-btn:hover {
     color: var(--danger);
+  }
+
+  .pin-btn.pinned {
+    color: var(--accent);
+  }
+
+  .pin-btn:hover {
+    color: var(--accent);
   }
 
   /* comfortable density */
