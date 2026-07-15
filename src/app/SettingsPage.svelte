@@ -152,6 +152,7 @@
       <div class="row">
         <div class="text">
           <div class="label">Clicking a stored tab</div>
+          <div class="desc">Hold ⌘ (or Ctrl) while clicking to keep the tab either way.</div>
         </div>
         <select
           class="select"

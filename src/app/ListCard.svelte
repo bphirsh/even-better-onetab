@@ -163,7 +163,7 @@
     toast('Copied as Markdown')
   }
 
-  const openTab = async (index: number) => {
+  const openTab = async (index: number, keep = false) => {
     const tab = list.tabs[index]
     if (!tab) return
     // single tabs follow the same "Open tabs in" setting as list restores
@@ -186,7 +186,8 @@
     if (tab.group && createdId != null) {
       await placeTabsInGroup([createdId], $state.snapshot(tab.group), createdWindowId)
     }
-    if (app.opts.itemClickAction === 'open-and-remove') {
+    // holding cmd/ctrl keeps the tab in the list regardless of the setting
+    if (!keep && app.opts.itemClickAction === 'open-and-remove') {
       const tabs = list.tabs.filter((_, i) => i !== index)
       act({ type: 'list-update', id: list._id, patch: { tabs } })
     }
@@ -377,7 +378,7 @@
             tab={item.tab}
             display={app.opts.itemDisplay}
             hideFavicon={app.opts.hideFavicon}
-            onOpen={() => openTab(index)}
+            onOpen={keep => openTab(index, keep)}
             onRemove={() => removeTab(index)}
           />
         </div>

@@ -14,7 +14,8 @@
     tab: TabItem
     display: Options['itemDisplay']
     hideFavicon: boolean
-    onOpen: () => void
+    /** keep = true when a modifier (cmd/ctrl) is held, meaning "don't remove". */
+    onOpen: (keep: boolean) => void
     onRemove: () => void
   } = $props()
 
@@ -31,7 +32,13 @@
   const letter = $derived((tab.title || domain || '?').charAt(0).toUpperCase())
 </script>
 
-<div class="row" role="button" tabindex="0" onclick={onOpen} onkeydown={e => e.key === 'Enter' && onOpen()}>
+<div
+  class="row"
+  role="button"
+  tabindex="0"
+  onclick={e => onOpen(e.metaKey || e.ctrlKey)}
+  onkeydown={e => e.key === 'Enter' && onOpen(e.metaKey || e.ctrlKey)}
+>
   {#if !hideFavicon}
     {#if tab.favIconUrl && !faviconFailed}
       <img class="favicon" src={tab.favIconUrl} alt="" onerror={() => (faviconFailed = true)} />
