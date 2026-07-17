@@ -11,12 +11,13 @@ Chrome and Brave. If it's useful to you, consider
 [sponsoring the project](https://github.com/sponsors/bphirsh) ☕.
 
 <p align="center">
-  <img src="docs/store/shot-1-lists-light.png" alt="The list page (light theme)" width="400" />
-  <img src="docs/store/shot-2-lists-dark.png" alt="The list page (dark theme)" width="400" />
+  <img src="docs/store/shot-1.png" alt="Collapse a wall of open tabs into one clean list, in one click" width="760" />
 </p>
 <p align="center">
-  <img src="docs/store/shot-3-settings.png" alt="Settings" width="400" />
-  <img src="docs/store/shot-4-history.png" alt="Recently Deleted" width="400" />
+  <img src="docs/store/shot-2.png" alt="Tab groups are stored — and restored — as tab groups, name and color intact" width="760" />
+</p>
+<p align="center">
+  <img src="docs/store/shot-3.png" alt="Sync without an account: your lists live in your own GitHub gist, and open on your phone" width="760" />
 </p>
 
 This is a fork of [cnwangjie/better-onetab](https://github.com/cnwangjie/better-onetab)
