@@ -11,6 +11,7 @@
   import { act } from './actions'
   import { startAutoScroll, stopAutoScroll } from './dnd-autoscroll'
   import TabRow from './TabRow.svelte'
+  import { t } from '../i18n/i18n.svelte'
 
   let { list, canDrag = false }: { list: TabList; canDrag?: boolean } = $props()
 
@@ -123,7 +124,7 @@
   })
 
   const undoAction = ({ copy, index }: ReturnType<typeof captureForUndo>) => ({
-    label: 'Undo',
+    label: t('card.undo'),
     fn: () => act({ type: 'list-add', list: copy, index }),
   })
 
@@ -138,19 +139,19 @@
     }
     const captured = captureForUndo()
     const { ok } = await act({ type: 'restore-list', id: list._id, newWindow, remove: true })
-    if (ok) toast('List opened & removed', 'info', undoAction(captured))
+    if (ok) toast(t('card.toastOpenedRemoved'), 'info', undoAction(captured))
   }
 
   const removeListNow = async () => {
     closeMenu()
-    if (app.opts.alertRemoveList && !confirm(`Delete “${list.title || `${list.tabs.length} tabs`}”?`)) return
+    // No confirm dialog: deletion shows an Undo toast and stays recoverable in History.
     const captured = captureForUndo()
     // fade the card out first, then mutate — the dnd flip then closes the gap.
     // (a Svelte out: transition here would fight svelte-dnd-action's DOM)
     leaving = true
     await new Promise(r => setTimeout(r, 150))
     const { ok } = await act({ type: 'list-remove', id: list._id })
-    if (ok) toast('List deleted', 'info', undoAction(captured))
+    if (ok) toast(t('card.toastDeleted'), 'info', undoAction(captured))
     else leaving = false
   }
 
@@ -160,7 +161,7 @@
     const lines = list.tabs.map(t => `- [${escapeTitle(t.title || t.url)}](${t.url})`)
     const text = (list.title ? `## ${list.title}\n\n` : '') + lines.join('\n') + '\n'
     await navigator.clipboard.writeText(text)
-    toast('Copied as Markdown')
+    toast(t('card.toastCopiedMarkdown'))
   }
 
   const openTab = async (index: number, keep = false) => {
@@ -240,12 +241,12 @@
     {#if canDrag}
       <!-- not a <button>: the dnd library refuses to start drags from elements
            with a .value property, which buttons have -->
-      <div class="icon-btn grip" role="button" aria-label="Drag to reorder">
+      <div class="icon-btn grip" role="button" aria-label={t('card.dragToReorder')}>
         <Icon name="grip" size={14} />
       </div>
     {/if}
 
-    <button class="icon-btn chevron" class:collapsed={!list.expand} aria-label="Expand or collapse" onclick={toggleExpand}>
+    <button class="icon-btn chevron" class:collapsed={!list.expand} aria-label={t('card.expandCollapse')} onclick={toggleExpand}>
       <Icon name="chevron" size={16} />
     </button>
 
@@ -254,7 +255,7 @@
       <input
         class="title-input"
         type="text"
-        placeholder="List title"
+        placeholder={t('card.titlePlaceholder')}
         autofocus
         bind:value={titleDraft}
         onblur={commitTitle}
@@ -264,53 +265,53 @@
         }}
       />
     {:else}
-      <button class="title" class:untitled={!list.title} onclick={startTitleEdit} title="Click to rename">
-        <span class="title-text">{list.title || 'Untitled'}</span>
+      <button class="title" class:untitled={!list.title} onclick={startTitleEdit} title={t('card.clickToRename')}>
+        <span class="title-text">{list.title || t('card.untitled')}</span>
       </button>
     {/if}
 
     {#if list.pinned}
-      <span class="pin-badge" title="Pinned"><Icon name="pin" size={13} /></span>
+      <span class="pin-badge" title={t('card.pinned')}><Icon name="pin" size={13} /></span>
     {/if}
 
-    <span class="meta">{list.tabs.length} tab{list.tabs.length === 1 ? '' : 's'} · {timeAgo(list.time)}</span>
+    <span class="meta">{t('card.tabCount', { n: list.tabs.length })} · {timeAgo(list.time)}</span>
 
-    <div class="actions">
-      <button class="open-btn" title="Open all tabs in this list" onclick={() => restore()}>Open</button>
+    <div class="actions" class:always={app.opts.listActions === 'always'}>
+      <button class="open-btn" title={t('card.openAllTitle')} onclick={() => restore()}>{t('card.open')}</button>
       <button
         class="icon-btn pin-btn"
         class:pinned={list.pinned}
-        title={list.pinned ? 'Unpin list' : 'Pin list'}
-        aria-label={list.pinned ? 'Unpin list' : 'Pin list'}
+        title={list.pinned ? t('card.unpinList') : t('card.pinList')}
+        aria-label={list.pinned ? t('card.unpinList') : t('card.pinList')}
         onclick={togglePin}
       >
         <Icon name="pin" size={15} />
       </button>
-      <button class="icon-btn delete-btn" title="Delete list" aria-label="Delete list" onclick={removeListNow}>
+      <button class="icon-btn delete-btn" title={t('card.deleteList')} aria-label={t('card.deleteList')} onclick={removeListNow}>
         <Icon name="trash" size={15} />
       </button>
       <div class="dropdown" bind:this={menuEl} onmouseenter={menuEnter} onmouseleave={menuLeave}>
-        <button class="icon-btn" title="More" onclick={() => (menuOpen = true)}>
+        <button class="icon-btn" title={t('card.more')} onclick={() => (menuOpen = true)}>
           <Icon name="more" size={15} />
         </button>
         {#if menuOpen || menuHover}
           <div class="menu">
             <button class="menu-item" onclick={() => restore(true)}>
-              <Icon name="external" size={14} /> Open in new window
+              <Icon name="external" size={14} /> {t('card.openInNewWindow')}
             </button>
             <button class="menu-item" onclick={() => restore(false, true)}>
-              <Icon name="restore" size={14} /> Open &amp; remove
+              <Icon name="restore" size={14} /> {t('card.openAndRemove')}
             </button>
             <div class="menu-sep"></div>
             <button class="menu-item" onclick={togglePin}>
               <Icon name="pin" size={14} />
-              {list.pinned ? 'Unpin' : 'Pin'}
+              {list.pinned ? t('card.unpin') : t('card.pin')}
             </button>
             <button class="menu-item" onclick={startTagsEdit}>
-              <Icon name="tag" size={14} /> Edit tags
+              <Icon name="tag" size={14} /> {t('card.editTags')}
             </button>
             <button class="menu-item" onclick={copyMarkdown}>
-              <Icon name="copy" size={14} /> Copy as Markdown
+              <Icon name="copy" size={14} /> {t('card.copyAsMarkdown')}
             </button>
             <div class="menu-sep"></div>
             <div class="swatches">
@@ -319,15 +320,15 @@
                   class="swatch"
                   class:active={list.color === name}
                   style:background={name ? LIST_COLORS[name] : 'var(--surface-2)'}
-                  title={name || 'No color'}
-                  aria-label={name || 'No color'}
+                  title={name || t('card.noColor')}
+                  aria-label={name || t('card.noColor')}
                   onclick={() => setColor(name)}
                 ></button>
               {/each}
             </div>
             <div class="menu-sep"></div>
             <button class="menu-item danger" onclick={removeListNow}>
-              <Icon name="trash" size={14} /> Delete list
+              <Icon name="trash" size={14} /> {t('card.deleteList')}
             </button>
           </div>
         {/if}
@@ -342,7 +343,7 @@
       <input
         class="tags-input"
         type="text"
-        placeholder="Comma-separated tags"
+        placeholder={t('card.tagsPlaceholder')}
         autofocus
         bind:value={tagsDraft}
         onblur={commitTags}
@@ -378,6 +379,7 @@
             tab={item.tab}
             display={app.opts.itemDisplay}
             hideFavicon={app.opts.hideFavicon}
+            removeVisible={app.opts.tabRemove}
             onOpen={keep => openTab(index, keep)}
             onRemove={() => removeTab(index)}
           />
@@ -506,6 +508,7 @@
   }
 
   .card:hover .actions,
+  .actions.always,
   .dropdown:has(.menu) {
     opacity: 1;
   }

@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { TabItem, TabList, TrashEntry, TrashTabEntry } from '../core/types'
   import Icon from '../ui/Icon.svelte'
+  import { t } from '../i18n/i18n.svelte'
   import { app } from '../ui/state.svelte'
   import { timeAgo } from '../ui/time'
   import { toast } from '../ui/toast.svelte'
@@ -22,10 +23,10 @@
 
   const retentionNote = $derived(
     ({
-      immediately: 'New deletions are removed immediately.',
-      day: 'Items are deleted after 1 day.',
-      week: 'Items are deleted after 1 week.',
-      month: 'Items are deleted after 1 month.',
+      immediately: t('history.retention.immediately'),
+      day: t('history.retention.day'),
+      week: t('history.retention.week'),
+      month: t('history.retention.month'),
     })[app.opts.trashRetention],
   )
 
@@ -45,31 +46,43 @@
 
   const recover = async (id: string) => {
     const { ok } = await act({ type: 'trash-restore', id })
-    if (ok) toast('List recovered — it’s back in Lists')
+    if (ok) toast(t('history.toast.listRecovered'))
   }
 
   const recoverTab = async (id: string) => {
     const { ok } = await act({ type: 'tab-trash-restore', id })
-    if (ok) toast('Tab recovered — it’s back in its list')
+    if (ok) toast(t('history.toast.tabRecovered'))
   }
 
   const deleteListForever = async (entry: TrashEntry) => {
     const copy = $state.snapshot(entry) as TrashEntry
     const { ok } = await act({ type: 'trash-delete', id: entry.list._id, deletedAt: entry.deletedAt })
-    if (ok) toast('List permanently deleted', 'info', { label: 'Undo', fn: () => act({ type: 'trash-put', entry: copy }) })
+    if (ok)
+      toast(t('history.toast.listDeleted'), 'info', {
+        label: t('history.action.undo'),
+        fn: () => act({ type: 'trash-put', entry: copy }),
+      })
   }
 
   const deleteTabForever = async (entry: TrashTabEntry) => {
     const copy = $state.snapshot(entry) as TrashTabEntry
     const { ok } = await act({ type: 'tab-trash-delete', id: entry.id })
-    if (ok) toast('Tab permanently deleted', 'info', { label: 'Undo', fn: () => act({ type: 'tab-trash-put', entry: copy }) })
+    if (ok)
+      toast(t('history.toast.tabDeleted'), 'info', {
+        label: t('history.action.undo'),
+        fn: () => act({ type: 'tab-trash-put', entry: copy }),
+      })
   }
 
   const clearAll = async () => {
     const trash = $state.snapshot(app.trash) as TrashEntry[]
     const tabTrash = $state.snapshot(app.tabTrash) as TrashTabEntry[]
     const { ok } = await act({ type: 'trash-clear' })
-    if (ok) toast('All history deleted', 'info', { label: 'Undo', fn: () => act({ type: 'trash-put-all', trash, tabTrash }) })
+    if (ok)
+      toast(t('history.toast.allDeleted'), 'info', {
+        label: t('history.action.undo'),
+        fn: () => act({ type: 'trash-put-all', trash, tabTrash }),
+      })
   }
 </script>
 
@@ -95,16 +108,16 @@
   <div class="actions slide">
     <button
       class="icon-btn"
-      title="Recover list"
-      aria-label="Recover list"
+      title={t('history.action.recoverList')}
+      aria-label={t('history.action.recoverList')}
       onclick={e => (e.stopPropagation(), recover(entry.list._id))}
     >
       <Icon name="restore" size={15} />
     </button>
     <button
       class="icon-btn del"
-      title="Delete permanently"
-      aria-label="Delete permanently"
+      title={t('history.action.deletePermanently')}
+      aria-label={t('history.action.deletePermanently')}
       onclick={e => (e.stopPropagation(), deleteListForever(entry))}
     >
       <Icon name="trash" size={15} />
@@ -126,19 +139,19 @@
 
 <div class="page">
   <div class="page-head">
-    <h1>Recently Deleted</h1>
+    <h1>{t('history.heading')}</h1>
     {#if feed.length > 0}
       <button class="btn danger" onclick={clearAll}>
-        <Icon name="trash" size={13} /> Delete all
+        <Icon name="trash" size={13} /> {t('history.action.deleteAll')}
       </button>
     {/if}
   </div>
 
   {#if feed.length === 0}
     {#if app.opts.trashRetention === 'immediately'}
-      <p class="empty">Deleted items are removed immediately — change “Deleted lists are” in Settings to keep them recoverable here.</p>
+      <p class="empty">{t('history.empty.immediately')}</p>
     {:else}
-      <p class="empty">Nothing here. Deleted lists and tabs land here so you can recover them.</p>
+      <p class="empty">{t('history.empty.default')}</p>
     {/if}
   {:else}
     <div class="card">
@@ -169,7 +182,7 @@
               <div class="merged">
                 <button
                   class="chev-col"
-                  aria-label="Expand or collapse"
+                  aria-label={t('history.action.expandCollapse')}
                   onclick={() => toggle(key)}
                 >
                   <span class="chevron" class:open={!collapsed[key]}><Icon name="chevron" size={14} /></span>
@@ -177,7 +190,7 @@
                 <div class="merged-tabs">
                   {#if collapsed[key]}
                     <button class="tab summary" onclick={() => toggle(key)}>
-                      {entry.list.tabs.length} tab{entry.list.tabs.length === 1 ? '' : 's'}
+                      {t('history.tabCount', { n: entry.list.tabs.length })}
                     </button>
                   {:else}
                     {#each entry.list.tabs as tab, i (i)}
@@ -202,7 +215,11 @@
             <div class="tab-entry">
               <button
                 class="tab"
-                title={`${entry.tab.url} — from “${entry.listTitle || 'Untitled'}”, deleted ${timeAgo(entry.deletedAt)}`}
+                title={t('history.tabTooltip', {
+                  url: entry.tab.url,
+                  list: entry.listTitle || t('history.untitled'),
+                  when: timeAgo(entry.deletedAt),
+                })}
                 onclick={() => openTab(entry.tab.url)}
               >
                 {@render favicon(entry.tab)}
@@ -211,13 +228,18 @@
               </button>
               <span class="deleted-when">{timeAgo(entry.deletedAt)}</span>
               <div class="actions slide">
-                <button class="icon-btn" title="Recover tab" aria-label="Recover tab" onclick={() => recoverTab(entry.id)}>
+                <button
+                  class="icon-btn"
+                  title={t('history.action.recoverTab')}
+                  aria-label={t('history.action.recoverTab')}
+                  onclick={() => recoverTab(entry.id)}
+                >
                   <Icon name="restore" size={15} />
                 </button>
                 <button
                   class="icon-btn del"
-                  title="Delete permanently"
-                  aria-label="Delete permanently"
+                  title={t('history.action.deletePermanently')}
+                  aria-label={t('history.action.deletePermanently')}
                   onclick={() => deleteTabForever(entry)}
                 >
                   <Icon name="trash" size={15} />
@@ -229,7 +251,7 @@
       {/each}
     </div>
     {#if feed.length > CAP && !showAll}
-      <button class="see-all" onclick={() => (showAll = true)}>See all ({feed.length})</button>
+      <button class="see-all" onclick={() => (showAll = true)}>{t('history.seeAll', { n: feed.length })}</button>
     {/if}
     <p class="note">{retentionNote}</p>
   {/if}

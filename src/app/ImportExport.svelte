@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from '../i18n/i18n.svelte'
   import { createSnapshot, parseSnapshot } from '../core/lists'
   import Icon from '../ui/Icon.svelte'
   import { app } from '../ui/state.svelte'
@@ -32,46 +33,46 @@
     try {
       const imported = parseSnapshot(JSON.parse(await file.text()))
       if (imported.length === 0) {
-        toast('No lists found in that file', 'error')
+        toast(t('backup.noListsFound'), 'error')
         return
       }
       if (importMode === 'replace') {
-        if (!confirm(`Replace all current lists with the ${imported.length} imported lists?`)) return
-        await act({ type: 'lists-replace', lists: imported }, `Imported ${imported.length} lists`)
+        if (!confirm(t('backup.replaceConfirm', { n: imported.length }))) return
+        await act({ type: 'lists-replace', lists: imported }, t('backup.importedToast', { n: imported.length }))
       } else {
         await act(
           { type: 'lists-replace', lists: [...imported, ...app.lists] },
-          `Imported ${imported.length} lists`,
+          t('backup.importedToast', { n: imported.length }),
         )
       }
     } catch {
-      toast('Could not read that file — is it an Even Better OneTab backup?', 'error')
+      toast(t('backup.couldNotRead'), 'error')
     }
   }
 </script>
 
 <section>
-  <h2>Backup</h2>
+  <h2>{t('backup.heading')}</h2>
   <div class="card">
     <div class="row">
       <div class="text">
-        <div class="label">Export</div>
-        <div class="desc">Download all lists as a JSON file (the same format sync uses).</div>
+        <div class="label">{t('backup.exportLabel')}</div>
+        <div class="desc">{t('backup.exportDesc')}</div>
       </div>
       <button class="btn" onclick={exportJson}>
-        <Icon name="download" size={14} /> Export JSON
+        <Icon name="download" size={14} /> {t('backup.exportJson')}
       </button>
     </div>
     <div class="row">
       <div class="text">
-        <div class="label">Import</div>
-        <div class="desc">Restore from a backup file — merge with or replace your current lists.</div>
+        <div class="label">{t('backup.importLabel')}</div>
+        <div class="desc">{t('backup.importDesc')}</div>
       </div>
       <div class="btn-group">
         <button class="btn" onclick={() => pickFile('merge')}>
-          <Icon name="upload" size={14} /> Merge
+          <Icon name="upload" size={14} /> {t('backup.merge')}
         </button>
-        <button class="btn danger" onclick={() => pickFile('replace')}>Replace</button>
+        <button class="btn danger" onclick={() => pickFile('replace')}>{t('backup.replace')}</button>
       </div>
     </div>
   </div>

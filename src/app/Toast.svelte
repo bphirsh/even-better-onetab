@@ -8,7 +8,7 @@
 </script>
 
 {#if toasts.items.length > 0}
-  <div class="toasts">
+  <div class="toasts" role="status" aria-live="polite">
     {#each toasts.items as item (item.id)}
       <div class="toast" class:error={item.kind === 'error'}>
         <span>{item.text}</span>

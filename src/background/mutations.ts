@@ -38,11 +38,17 @@ export const mutateLists = (fn: (lists: TabList[]) => TabList[] | void, sync = t
     const presentIds = new Set(result.map(l => l._id))
     const removed = [...byId.values()].filter(l => !presentIds.has(l._id))
     if (removed.length > 0) {
-      // Tombstone so sync propagates the deletion; trash so History can recover it.
-      await addTombstones(removed.map(l => l._id))
+      // Recover-first ordering. Trash before the destructive write and tombstone
+      // after it, so if setLists throws (e.g. quota) we can never be left with a
+      // tombstone for a still-present list — which the next sync would read as a
+      // real deletion. Worst case here is a deletion that doesn't propagate, not
+      // one that happens on its own.
       await addToTrash(removed)
+      await setLists(result)
+      await addTombstones(removed.map(l => l._id))
+    } else {
+      await setLists(result)
     }
-    await setLists(result)
     if (sync) schedulePush()
   })
 

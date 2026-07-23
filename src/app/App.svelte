@@ -1,6 +1,7 @@
 <script lang="ts">
   import { cubicOut } from 'svelte/easing'
   import { fly } from 'svelte/transition'
+  import { applyLocale, t } from '../i18n/i18n.svelte'
   import { app, applyTheme, initState } from '../ui/state.svelte'
   import { timeAgo } from '../ui/time'
   import Header from './Header.svelte'
@@ -13,6 +14,10 @@
 
   $effect(() => {
     if (app.loaded) applyTheme(app.opts.theme)
+  })
+
+  $effect(() => {
+    if (app.loaded) applyLocale(app.opts.locale)
   })
 
   const routeFromHash = () => {
@@ -28,19 +33,27 @@
     return () => window.removeEventListener('hashchange', onHashChange)
   })
 
+  // Once the page is scrolled, a top mask fades content out under the bar instead
+  // of a hard cut. Off at the very top so the first heading stays crisp.
+  let scrolled = $state(false)
+  $effect(() => {
+    route // reset when the route changes (fresh page starts at the top)
+    scrolled = false
+  })
+
   const totalTabs = $derived(app.lists.reduce((sum, list) => sum + list.tabs.length, 0))
 
   const syncStatus = $derived.by(() => {
     if (!app.syncConfig.enabled) return null
-    if (app.syncState.error) return { kind: 'error' as const, text: 'Sync error' }
-    if (app.syncState.lastPushAt) return { kind: 'ok' as const, text: `Synced ${timeAgo(app.syncState.lastPushAt)}` }
-    return { kind: 'ok' as const, text: 'Sync on' }
+    if (app.syncState.error) return { kind: 'error' as const, text: t('sync.statusError') }
+    if (app.syncState.lastPushAt) return { kind: 'ok' as const, text: t('sync.statusSynced', { time: timeAgo(app.syncState.lastPushAt) }) }
+    return { kind: 'ok' as const, text: t('sync.statusOn') }
   })
 </script>
 
 <div class="shell" class:comfortable={app.opts.density === 'comfortable'}>
   <Header {route} />
-  <main>
+  <main class:scrolled onscroll={e => (scrolled = e.currentTarget.scrollTop > 6)}>
     {#key route}
       <div class="route" in:fly={{ y: 8, duration: 170, easing: cubicOut }}>
         {#if route === 'settings'}
@@ -55,13 +68,13 @@
   </main>
 </div>
 
-<a class="corner-status" href="#/settings" title="Open settings">
+<a class="corner-status" href="#/settings" title={t('nav.settings')}>
   {#if syncStatus}
     <span class="dot" class:error={syncStatus.kind === 'error'}></span>
     <span>{syncStatus.text}</span>
     <span class="sep">·</span>
   {/if}
-  <span>{app.lists.length} lists · {totalTabs} tabs</span>
+  <span>{t('status.lists', { n: app.lists.length })} · {t('status.tabs', { n: totalTabs })}</span>
 </a>
 <Toast />
 
@@ -83,6 +96,12 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
+  }
+
+  /* content dissolves under the top bar once scrolled, rather than a hard edge */
+  main.scrolled {
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 34px);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 34px);
   }
 
   .corner-status {

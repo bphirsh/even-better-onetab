@@ -39,7 +39,7 @@
 <body>
 <div class="wrap">
   <h1>Privacy Policy</h1>
-  <div class="updated">Even Better OneTab browser extension · Last updated July 10, 2026</div>
+  <div class="updated">Even Better OneTab browser extension · Last updated July 17, 2026</div>
 
   <div class="tldr">
     <strong>In short:</strong> your data stays on your device. We collect nothing, transmit
@@ -72,13 +72,22 @@
     stored in the extension's local storage on your device. GitHub's handling of your data is
     governed by <a href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement" rel="noreferrer">GitHub's Privacy Statement</a>.
   </p>
+  <p>
+    A note on the token: a classic GitHub token with the <code>gist</code> scope can read and
+    write <em>every</em> gist on your account, not only the one this extension creates. If you'd
+    like to limit that, create a fine-grained personal access token restricted to gists instead.
+    Either way the token lives only on your device — treat it like a password and don't paste it
+    anywhere you wouldn't paste one.
+  </p>
 
   <h2>The mobile viewer</h2>
   <p>
     The companion <a href="https://bphirsh.github.io/even-better-onetab/viewer/">mobile viewer
     page</a> works the same way: the token and gist id you enter are stored only in that
     browser's local storage, on that device, and are used solely to fetch your gist from
-    GitHub's API. The page has no analytics and no backend.
+    GitHub's API. The page has no analytics and no backend. To show each site's icon it loads
+    favicons from Google's public favicon service (<code>google.com/s2/favicons</code>), which
+    means that service sees the domains in your lists as you view them.
   </p>
 
   <h2>Permissions, briefly</h2>
@@ -87,7 +96,6 @@
     <li><strong>storage</strong> — keep your lists and settings in the browser</li>
     <li><strong>contextMenus</strong> — the right-click store actions</li>
     <li><strong>alarms</strong> — a short timer that batches sync uploads</li>
-    <li><strong>history</strong> — only for the optional "keep stored tabs in browser history" setting</li>
   </ul>
 
   <h2>Data removal</h2>

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="_base.css" />
+<style>
+  .stage { flex-direction: column; }
+  .head { max-width: 900px; margin-top: 8px; }
+  .head h1 { margin-bottom: 14px; }
+  .head .sub { max-width: 720px; }
+  .flow { flex: 1; display: flex; align-items: center; justify-content: center; gap: 34px; margin-top: 6px; }
+
+  /* browser window with a colored tab group */
+  .win { width: 470px; border-radius: 14px; background: #e4e7ec; box-shadow: var(--shadow); overflow: hidden; }
+  .winbar { display: flex; align-items: center; gap: 6px; padding: 9px 12px; background: #dde1e7; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .tabstrip { display: flex; align-items: flex-end; gap: 4px; padding: 8px 10px 0; background: #dde1e7; }
+  .t2 { width: 34px; height: 28px; border-radius: 7px 7px 0 0; background: #eef1f5; display: flex; align-items: center; justify-content: center; }
+  .t2 i { width: 11px; height: 11px; border-radius: 3px; }
+  .group { display: flex; align-items: flex-end; gap: 4px; padding: 3px 6px 0; border-radius: 9px 9px 0 0; background: color-mix(in srgb, var(--teal) 20%, transparent); position: relative; }
+  .grouplabel { position: absolute; top: -22px; left: 0; font-size: 12px; font-weight: 700; color: var(--teal); background: color-mix(in srgb, var(--teal) 16%, #fff); padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+  .group .t2.on { background: #fff; }
+  .winbody { height: 34px; background: #fff; }
+
+  .step { display: flex; flex-direction: column; align-items: center; gap: 10px; color: var(--text-3); }
+  .step .lab { font-size: 13.5px; font-weight: 700; letter-spacing: .02em; }
+  .step .lab.store { color: var(--accent); }
+  .step .lab.restore { color: var(--teal); }
+  .step svg { display: block; }
+
+  .card { width: 430px; border-left-color: var(--teal); }
+  .card.teal .bar, .card.teal { }
+  .glabel { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; background: color-mix(in srgb, var(--teal) 16%, transparent); color: var(--teal); font-size: 12px; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <img class="wordmark" src="../../../public/icons/wordmark-transparent.png" alt="" />
+  <div class="head">
+    <h1>Your tab groups come<br />back as tab groups.</h1>
+    <div class="sub">Others flatten a named, colored group into an anonymous pile of links. This keeps the name, the color, and the grouping — and restores them right back into the group.</div>
+  </div>
+  <div class="flow">
+    <div class="win" style="border-left:0">
+      <div class="winbar">
+        <span class="dot" style="background:#ff5f57"></span>
+        <span class="dot" style="background:#febc2e"></span>
+        <span class="dot" style="background:#28c840"></span>
+      </div>
+      <div class="tabstrip">
+        <div class="t2"><i style="background:#111"></i></div>
+        <div class="t2"><i style="background:#3a6ea5"></i></div>
+        <div class="group">
+          <span class="grouplabel">● Research</span>
+          <div class="t2 on"><i style="background:#ff4500"></i></div>
+          <div class="t2"><i style="background:#1db954"></i></div>
+          <div class="t2"><i style="background:#8b5cf6"></i></div>
+        </div>
+        <div class="t2"><i style="background:#0ea5e9"></i></div>
+      </div>
+      <div class="winbody"></div>
+    </div>
+
+    <div class="step">
+      <div class="lab store">STORE ▸</div>
+      <svg width="46" height="24" viewBox="0 0 46 24" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="8" x2="40" y2="8"/><polyline points="34 3 41 8 34 13"/></svg>
+      <svg width="46" height="24" viewBox="0 0 46 24" fill="none" stroke="var(--teal)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="44" y1="17" x2="6" y2="17"/><polyline points="12 12 5 17 12 22"/></svg>
+      <div class="lab restore">◂ RESTORE</div>
+    </div>
+
+    <div class="card bar raised teal">
+      <div class="list-head">
+        <span class="list-title">Research</span>
+        <span class="list-meta">3 tabs · pinned</span>
+        <span class="chev">▾</span>
+      </div>
+      <div style="padding:0 18px 8px"><span class="glabel">● Research group</span></div>
+      <div class="row"><span class="fav" style="background:#ff4500"></span><span class="t">Ergonomic desk setups <span class="d">nytimes.com</span></span></div>
+      <div class="row"><span class="fav" style="background:#1db954"></span><span class="t">Standing desk field guide <span class="d">wirecutter.com</span></span></div>
+      <div class="row" style="padding-bottom:16px"><span class="fav" style="background:#8b5cf6"></span><span class="t">Posture &amp; focus research <span class="d">ncbi.nlm.nih.gov</span></span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

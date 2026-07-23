@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from '../i18n/i18n.svelte'
   import { setSyncConfig } from '../core/storage'
   import Icon from '../ui/Icon.svelte'
   import { app } from '../ui/state.svelte'
@@ -22,11 +23,7 @@
     if (ok) {
       tokenDraft = ''
       gistIdDraft = ''
-      toast(
-        gistId
-          ? 'Sync connected — lists merged from your existing gist'
-          : 'Sync connected — lists uploaded to your private gist',
-      )
+      toast(gistId ? t('sync.connectedMerged') : t('sync.connectedUploaded'))
     }
   }
 
@@ -34,7 +31,7 @@
 
   const syncNow = async () => {
     busy = true
-    await act({ type: 'sync-push' }, 'Synced to gist')
+    await act({ type: 'sync-push' }, t('sync.syncedToast'))
     busy = false
   }
 
@@ -42,70 +39,64 @@
     busy = true
     const { ok, result } = await act<{ count: number }>({ type: 'sync-pull' })
     busy = false
-    if (ok && result) toast(`Merged with the gist — ${result.count} lists`)
+    if (ok && result) toast(t('sync.mergedToast', { n: result.count }))
   }
 
   const disconnect = () => {
-    if (!confirm('Disconnect sync? The gist itself is not deleted.')) return
+    if (!confirm(t('sync.disconnectConfirm'))) return
     setSyncConfig({ enabled: false, gistToken: '', gistId: '' })
   }
 
   const copy = async (label: string, value: string) => {
     await navigator.clipboard.writeText(value)
-    toast(`${label} copied`)
+    toast(t('sync.copiedToast', { label }))
   }
 </script>
 
 <section>
-  <h2>Sync &amp; mobile</h2>
+  <h2>{t('sync.heading')}</h2>
   <div class="card">
     {#if !connected}
       <p class="intro">
-        Sync your lists to a <strong>private GitHub Gist</strong>. Changes upload automatically, the
-        gist keeps version history as a backup, and you can read your tabs from a phone with the
-        mobile viewer.
+        {t('sync.introBefore')}<strong>{t('sync.introGist')}</strong>{t('sync.introAfter')}
       </p>
       <ol class="steps">
         <li>
           <a
             href="https://github.com/settings/tokens/new?scopes=gist&description=Better+OneTab+Sync"
             target="_blank"
-            rel="noreferrer">Create a GitHub token</a
+            rel="noreferrer">{t('sync.step1Link')}</a
           >
-          with only the <code>gist</code> scope.
+          {t('sync.step1Before')}<code>gist</code>{t('sync.step1After')}
         </li>
-        <li>Paste it here — a private gist is created for you.</li>
+        <li>{t('sync.step2')}</li>
         <li>
-          Already synced before (previous install or another computer)? Also paste that gist's id
-          to reconnect to it and pull your lists in.
+          {t('sync.step3')}
         </li>
       </ol>
       <div class="connect">
         <input
           class="text-input"
           type="password"
-          placeholder="GitHub token (ghp_… or github_pat_…)"
+          placeholder={t('sync.tokenPlaceholder')}
           bind:value={tokenDraft}
           onkeydown={e => e.key === 'Enter' && connect()}
         />
         <input
           class="text-input"
           type="text"
-          placeholder="Existing gist id (optional — from gist.github.com)"
+          placeholder={t('sync.gistIdPlaceholder')}
           bind:value={gistIdDraft}
           onkeydown={e => e.key === 'Enter' && connect()}
         />
-        <button class="btn primary" disabled={busy || !tokenDraft.trim()} onclick={connect}>Connect</button>
+        <button class="btn primary" disabled={busy || !tokenDraft.trim()} onclick={connect}>{t('sync.connect')}</button>
       </div>
     {:else}
       <label class="row">
         <div class="text">
-          <div class="label">Automatic sync</div>
+          <div class="label">{t('sync.autoLabel')}</div>
           <div class="desc">
-            Uploads your lists and settings to
-            <a href={`https://gist.github.com/${app.syncConfig.gistId}`} target="_blank" rel="noreferrer">your private gist</a>
-            shortly after every change, and merges from it on browser startup. Newer edits win;
-            deletions sync too.
+            {t('sync.autoDescBefore')}<a href={`https://gist.github.com/${app.syncConfig.gistId}`} target="_blank" rel="noreferrer">{t('sync.autoDescLink')}</a>{t('sync.autoDescAfter')}
           </div>
         </div>
         <input
@@ -118,53 +109,50 @@
 
       <div class="row">
         <div class="text">
-          <div class="label">Status</div>
+          <div class="label">{t('sync.statusLabel')}</div>
           <div class="desc">
             {#if app.syncState.error}
               <span class="error">{app.syncState.error}</span>
             {:else if app.syncState.lastPushAt}
-              Last synced {timeAgo(app.syncState.lastPushAt)} ({fullTime(app.syncState.lastPushAt)})
+              {t('sync.lastSynced', { ago: timeAgo(app.syncState.lastPushAt), time: fullTime(app.syncState.lastPushAt) })}
             {:else}
-              Not synced yet
+              {t('sync.notSyncedYet')}
             {/if}
           </div>
         </div>
         <div class="btn-group">
           <button class="btn" disabled={busy} onclick={syncNow}>
-            <Icon name="refresh" size={14} /> Sync now
+            <Icon name="refresh" size={14} /> {t('sync.syncNow')}
           </button>
           <button class="btn" disabled={busy} onclick={pull}>
-            <Icon name="download" size={14} /> Merge from gist
+            <Icon name="download" size={14} /> {t('sync.mergeFromGist')}
           </button>
         </div>
       </div>
 
       <div class="row">
         <div class="text">
-          <div class="label">Mobile viewer</div>
+          <div class="label">{t('sync.mobileLabel')}</div>
           <div class="desc">
-            Open
-            <a href="https://bphirsh.github.io/even-better-onetab/viewer/" target="_blank" rel="noreferrer">the viewer page</a>
-            on your phone and paste your token and gist id once — your lists are readable anywhere.
-            The same two values reconnect sync on another computer or a reinstall.
+            {t('sync.mobileDescBefore')}<a href="https://bphirsh.github.io/even-better-onetab/viewer/" target="_blank" rel="noreferrer">{t('sync.mobileDescLink')}</a>{t('sync.mobileDescAfter')}
           </div>
         </div>
         <div class="btn-group">
-          <button class="btn" title="Copy the GitHub token" onclick={() => copy('Token', app.syncConfig.gistToken)}>
-            <Icon name="copy" size={13} /> Token
+          <button class="btn" title={t('sync.copyTokenTitle')} onclick={() => copy(t('sync.tokenName'), app.syncConfig.gistToken)}>
+            <Icon name="copy" size={13} /> {t('sync.tokenName')}
           </button>
-          <button class="btn" title="Copy the gist id" onclick={() => copy('Gist id', app.syncConfig.gistId)}>
-            <Icon name="copy" size={13} /> Gist id
+          <button class="btn" title={t('sync.copyGistIdTitle')} onclick={() => copy(t('sync.gistIdName'), app.syncConfig.gistId)}>
+            <Icon name="copy" size={13} /> {t('sync.gistIdName')}
           </button>
         </div>
       </div>
 
       <div class="row">
         <div class="text">
-          <div class="label">Disconnect</div>
-          <div class="desc">Removes the token from this browser. The gist is kept.</div>
+          <div class="label">{t('sync.disconnectLabel')}</div>
+          <div class="desc">{t('sync.disconnectDesc')}</div>
         </div>
-        <button class="btn danger" onclick={disconnect}>Disconnect</button>
+        <button class="btn danger" onclick={disconnect}>{t('sync.disconnect')}</button>
       </div>
     {/if}
   </div>

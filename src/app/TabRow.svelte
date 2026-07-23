@@ -3,17 +3,21 @@
   import type { Options } from '../core/options'
   import { GROUP_COLORS } from '../ui/colors'
   import Icon from '../ui/Icon.svelte'
+  import { t } from '../i18n/i18n.svelte'
 
   let {
     tab,
     display,
     hideFavicon,
+    removeVisible = 'hover',
     onOpen,
     onRemove,
   }: {
     tab: TabItem
     display: Options['itemDisplay']
     hideFavicon: boolean
+    /** Whether the remove button shows always or only on row hover. */
+    removeVisible?: 'hover' | 'always'
     /** keep = true when a modifier (cmd/ctrl) is held, meaning "don't remove". */
     onOpen: (keep: boolean) => void
     onRemove: () => void
@@ -52,7 +56,7 @@
       class="group"
       class:unnamed={!tab.group.title}
       style:--gc={GROUP_COLORS[tab.group.color] ?? GROUP_COLORS.grey}
-      title={`Tab group: ${tab.group.title || 'unnamed'}`}
+      title={t('tab.group', { title: tab.group.title || t('tab.unnamed') })}
     >{tab.group.title}</span>
   {/if}
 
@@ -66,13 +70,14 @@
   {/if}
 
   {#if tab.pinned}
-    <span class="pinned" title="Was pinned"><Icon name="pin" size={11} /></span>
+    <span class="pinned" title={t('tab.wasPinned')}><Icon name="pin" size={11} /></span>
   {/if}
 
   <button
     class="remove"
-    title="Remove from list"
-    aria-label="Remove from list"
+    class:always={removeVisible === 'always'}
+    title={t('tab.remove')}
+    aria-label={t('tab.remove')}
     onclick={e => {
       e.stopPropagation()
       onRemove()
@@ -186,7 +191,8 @@
     flex-shrink: 0;
   }
 
-  .row:hover .remove {
+  .row:hover .remove,
+  .remove.always {
     visibility: visible;
   }
 

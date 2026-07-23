@@ -14,10 +14,19 @@ export const genId = (): string => {
   return time + random + counter.toString(16).padStart(6, '0')
 }
 
+/**
+ * Most favicons are a short https URL (~cheap). Chrome occasionally hands back an
+ * inline `data:` favicon instead, which can be several KB; across thousands of
+ * stored tabs that's the one thing that can push storage.local toward its quota.
+ * Keep small data URIs, drop large ones — the row falls back to its letter avatar.
+ */
+const MAX_DATA_FAVICON = 1024
+const keepFavicon = (url?: string) => Boolean(url) && !(url!.startsWith('data:') && url!.length > MAX_DATA_FAVICON)
+
 export const normalizeTab = (tab: Partial<TabItem>): TabItem => ({
   url: tab.url ?? '',
   title: tab.title ?? '',
-  ...(tab.favIconUrl ? { favIconUrl: tab.favIconUrl } : {}),
+  ...(keepFavicon(tab.favIconUrl) ? { favIconUrl: tab.favIconUrl } : {}),
   ...(tab.pinned ? { pinned: true } : {}),
   ...(tab.muted ? { muted: true } : {}),
   ...(tab.group

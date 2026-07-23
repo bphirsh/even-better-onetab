@@ -1,5 +1,6 @@
 <script lang="ts">
   import { send } from '../core/messages'
+  import { t } from '../i18n/i18n.svelte'
   import Icon from '../ui/Icon.svelte'
   import { app, applyTheme, initState } from '../ui/state.svelte'
   import { timeAgo } from '../ui/time'
@@ -28,26 +29,26 @@
   }
 
   const listLabel = (title: string, count: number) =>
-    title || `${count} tab${count === 1 ? '' : 's'}`
+    title || t('popup.tabCount', { n: count })
 </script>
 
 <main>
   <div class="actions">
     <button class="action" onclick={() => store('all')}>
       <Icon name="archive" size={17} />
-      <span>Store all tabs</span>
+      <span>{t('popup.storeAll')}</span>
     </button>
     <button class="action" onclick={() => store('selected')}>
       <Icon name="download" size={17} />
-      <span>Store selected tabs</span>
+      <span>{t('popup.storeSelected')}</span>
     </button>
   </div>
 
   {#if recent.length > 0}
-    <div class="section-label">Recent lists</div>
+    <div class="section-label">{t('popup.recentLists')}</div>
     <div class="recent">
       {#each recent as list (list._id)}
-        <button class="recent-item" title="Restore this list" onclick={() => restore(list._id)}>
+        <button class="recent-item" title={t('popup.restoreList')} onclick={() => restore(list._id)}>
           <span class="recent-title">{listLabel(list.title, list.tabs.length)}</span>
           {#if list.title}
             <span class="recent-count">{list.tabs.length}</span>
@@ -60,12 +61,12 @@
       {/each}
     </div>
   {:else if app.loaded}
-    <div class="empty">No stored tabs yet</div>
+    <div class="empty">{t('popup.empty')}</div>
   {/if}
 
   <button class="footer" onclick={openLists}>
     <Icon name="layers" size={15} />
-    <span>Open Even Better OneTab</span>
+    <span>{t('popup.openApp')}</span>
   </button>
 </main>
 

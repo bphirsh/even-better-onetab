@@ -2,7 +2,8 @@
   "manifest_version": 3,
   "name": "Even Better OneTab",
   "version": "2.1.2",
-  "description": "Store and restore your tabs in one click — a fast, private OneTab alternative with sync and a mobile viewer.",
+  "default_locale": "en",
+  "description": "__MSG_appDesc__",
   "icons": {
     "16": "icons/icon_16.png",
     "32": "icons/icon_32.png",
@@ -28,19 +29,19 @@
   },
   "commands": {
     "store-selected-tabs": {
-      "description": "Store selected tabs"
+      "description": "__MSG_cmdStoreSelected__"
     },
     "store-all-tabs": {
-      "description": "Store all tabs in this window"
+      "description": "__MSG_cmdStoreAll__"
     },
     "store-all-in-all-windows": {
-      "description": "Store all tabs in all windows"
+      "description": "__MSG_cmdStoreAllWindows__"
     },
     "restore-latest-list": {
-      "description": "Restore the most recent list"
+      "description": "__MSG_cmdRestoreLatest__"
     },
     "open-lists": {
-      "description": "Open the tab list page"
+      "description": "__MSG_cmdOpenLists__"
     }
   },
   "permissions": [
@@ -48,7 +49,6 @@
     "storage",
     "tabs",
     "tabGroups",
-    "history",
     "alarms"
   ]
 }

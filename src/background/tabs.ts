@@ -96,15 +96,6 @@ export const storeTabs = async (tabs: chrome.tabs.Tab[], listId?: string) => {
   } else {
     await appendTabsToList(listId, items)
   }
-  if (opts.addHistory) {
-    for (const tab of storable) {
-      try {
-        await chrome.history.addUrl({ url: tab.url! })
-      } catch {
-        // some URLs (about:*, ...) can't be added to history
-      }
-    }
-  }
   await chrome.tabs.remove(storable.map(t => t.id!))
 }
 

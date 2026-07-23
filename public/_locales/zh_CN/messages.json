@@ -1,0 +1,8 @@
+{
+  "appDesc": { "message": "一键存储和恢复标签页——快速、私密的 OneTab 替代品，支持同步和移动端查看器。" },
+  "cmdStoreSelected": { "message": "存储选中的标签页" },
+  "cmdStoreAll": { "message": "存储此窗口中的所有标签页" },
+  "cmdStoreAllWindows": { "message": "存储所有窗口中的所有标签页" },
+  "cmdRestoreLatest": { "message": "恢复最近的列表" },
+  "cmdOpenLists": { "message": "打开标签页列表页面" }
+}

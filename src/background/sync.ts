@@ -1,4 +1,4 @@
-import { createSnapshot, parseSnapshot, parseTombstones } from '../core/lists'
+import { createSnapshot, normalizeList, parseSnapshot, parseTombstones } from '../core/lists'
 import { DEFAULT_OPTIONS, type Options } from '../core/options'
 import {
   getLists,
@@ -6,6 +6,7 @@ import {
   getOptsUpdatedAt,
   getSyncConfig,
   getTombstones,
+  setLists,
   setOptions,
   setSyncConfig,
   setSyncState,
@@ -14,7 +15,7 @@ import {
 import { GistProvider, createSyncGist } from '../core/sync/gist'
 import { mergeLists } from '../core/sync/merge'
 import type { Snapshot } from '../core/types'
-import { replaceLists } from './mutations'
+import { enqueue } from './mutations'
 
 export const SYNC_ALARM = 'sync-push'
 const PUSH_DELAY_MINUTES = 0.5
@@ -54,10 +55,25 @@ export const pushNow = async () => {
 
 /** Merges a remote snapshot into local state: lists, tombstones, and settings. */
 const applyRemoteSnapshot = async (snapshot: Snapshot) => {
-  const [localLists, localTombstones] = await Promise.all([getLists(), getTombstones()])
-  const merged = mergeLists(localLists, localTombstones, parseSnapshot(snapshot), parseTombstones(snapshot))
-  await setTombstones(merged.tombstones)
-  await replaceLists(merged.lists, true)
+  // Parsing is pure, so do it before taking the queue.
+  const remoteLists = parseSnapshot(snapshot)
+  const remoteTombstones = parseTombstones(snapshot)
+
+  // The read → merge → write must be atomic against local edits, so it runs as a
+  // single queued unit rather than reading outside the queue and only enqueuing
+  // the write (which would let a concurrent edit be merged against stale state
+  // and clobbered). setLists/setTombstones are used directly here — calling
+  // replaceLists would re-enter enqueue and deadlock.
+  const merged = await enqueue(async () => {
+    const [localLists, localTombstones] = await Promise.all([getLists(), getTombstones()])
+    const m = mergeLists(localLists, localTombstones, remoteLists, remoteTombstones)
+    await setLists(m.lists.map(normalizeList))
+    await setTombstones(m.tombstones)
+    return m
+  })
+  // the merged result is pushed so the gist converges too
+  schedulePush()
+
   // settings: last writer wins, keeping the remote's timestamp so the winner is stable
   if (
     snapshot.opts &&

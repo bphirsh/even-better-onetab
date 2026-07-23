@@ -1,0 +1,107 @@
+/*
+ * Rescues the text that sits directly on the page rather than on a card.
+ *
+ * Cards are opaque, so everything inside them is safe over any photo. The
+ * exceptions are the page titles and section headers — every h1/h2 in the app is
+ * one of those, none live inside a card, so this stays precise. A busy photo
+ * defeats them two ways: low contrast, and texture behind the glyphs. The halo
+ * fixes the second (it separates letterforms from whatever is behind them) and
+ * the contrast bump fixes the first. --bg tracks the theme, so the halo is a
+ * pale glow in light mode and a dark one in dark mode without a second rule.
+ *
+ * Scoped to [data-bg-active], which apply.ts sets only while something is
+ * actually painted behind the page. Deleting this folder drops the rule with it.
+ */
+
+:root[data-bg-active] h1,
+:root[data-bg-active] h2,
+/* the Settings footer (support line + version) also sits on the page, not a card */
+:root[data-bg-active] .support,
+:root[data-bg-active] .version {
+  text-shadow: 0 0 2px var(--bg), 0 0 6px var(--bg), 0 0 13px var(--bg);
+}
+
+/* section headers are muted by default, which a photo eats alive */
+:root[data-bg-active] h2 {
+  color: var(--text-2);
+}
+
+/* the "Buy me a coffee" button sits on its own solid accent fill — the halo
+   inherited from .support would just smudge its text, so cancel it there */
+:root[data-bg-active] .coffee {
+  text-shadow: none;
+}
+
+/*
+ * The top bar is a solid band of --bg: invisible against a flat page, a hard
+ * seam across the viewport against an image. Rather than dissolve the band, drop
+ * it entirely and let the wordmark and the buttons float as frosted chips.
+ */
+:root[data-bg-active] header {
+  background: transparent;
+}
+
+/* one recipe, so the chips read as a set */
+:root[data-bg-active] .wordmark,
+:root[data-bg-active] .nav-btn,
+:root[data-bg-active] .search:not(.open) {
+  background: color-mix(in srgb, var(--bg) 62%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+/*
+ * border-box is global, so the padding eats into the width — 142 − 24 keeps the
+ * artwork at exactly the 118px it is without a background.
+ */
+:root[data-bg-active] .wordmark {
+  width: 142px;
+  padding: 7px 12px;
+  border-radius: 999px;
+}
+
+/*
+ * In dark mode Header.svelte recolours the wordmark PNG with
+ * `filter: invert(1) hue-rotate(180deg)`, and filter applies to the element's
+ * whole rendering — background included. The chip above therefore arrives
+ * inverted: a pale pill under a pale logo.
+ *
+ * A *neutral* value is the one thing that survives predictably. invert() maps
+ * rgb(236) to rgb(19), and hue-rotate() is a no-op on greys, so this lands as
+ * the dark chip the buttons already use. Measured, not guessed: the
+ * backdrop-filter frost is *not* inverted alongside it, so it stays.
+ */
+:root[data-bg-active][data-theme='dark'] .wordmark {
+  background: rgba(236, 236, 236, 0.6);
+}
+
+:root[data-bg-active] .nav-btn,
+:root[data-bg-active] .search:not(.open) {
+  border-radius: 50%;
+}
+
+/* the closed search is 30×28, which a 50% radius would make an ellipse */
+:root[data-bg-active] .search:not(.open) {
+  height: 30px;
+}
+
+/* its inner button would otherwise paint its own rounded-rect hover inside the circle */
+:root[data-bg-active] .search:not(.open) .icon-btn {
+  background: transparent;
+}
+
+:root[data-bg-active] .nav-btn:hover,
+:root[data-bg-active] .search:not(.open):hover {
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+}
+
+/* re-state the states the chip background would otherwise outrank */
+:root[data-bg-active] .nav-btn.active {
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  color: var(--accent);
+}
+
+:root[data-bg-active] .search.open {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+}

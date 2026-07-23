@@ -1,0 +1,20 @@
+{
+  "appDesc": {
+    "message": "Guarda y restaura tus pestañas con un clic — una alternativa a OneTab rápida y privada, con sincronización y visor móvil."
+  },
+  "cmdStoreSelected": {
+    "message": "Guardar pestañas seleccionadas"
+  },
+  "cmdStoreAll": {
+    "message": "Guardar todas las pestañas de esta ventana"
+  },
+  "cmdStoreAllWindows": {
+    "message": "Guardar todas las pestañas de todas las ventanas"
+  },
+  "cmdRestoreLatest": {
+    "message": "Restaurar la lista más reciente"
+  },
+  "cmdOpenLists": {
+    "message": "Abrir la página de listas de pestañas"
+  }
+}

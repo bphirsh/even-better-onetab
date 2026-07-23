@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from '../i18n/i18n.svelte'
   import Icon from '../ui/Icon.svelte'
   import { app } from '../ui/state.svelte'
   import { filters } from './filters.svelte'
@@ -59,20 +60,20 @@
     <div class="spacer"></div>
 
     <div class="search" class:open={route === 'lists' && (searchOpen || filters.query)}>
-      <button class="icon-btn" title="Search" aria-label="Search" onclick={openSearch}>
+      <button class="icon-btn" title={t('nav.search')} aria-label={t('nav.search')} onclick={openSearch}>
         <Icon name="search" size={16} />
       </button>
       <input
         class="search-input"
         type="text"
-        placeholder="Search tabs…"
+        placeholder={t('nav.searchPlaceholder')}
         bind:this={searchInput}
         bind:value={filters.query}
         onblur={onSearchBlur}
         onkeydown={onSearchKeydown}
       />
       {#if filters.query}
-        <button class="icon-btn" aria-label="Clear search" onclick={() => ((filters.query = ''), searchInput?.focus())}>
+        <button class="icon-btn" aria-label={t('nav.clearSearch')} onclick={() => ((filters.query = ''), searchInput?.focus())}>
           <Icon name="x" size={14} />
         </button>
       {/if}
@@ -81,8 +82,8 @@
     <button
       class="icon-btn nav-btn"
       class:active={route === 'history'}
-      title="Recently deleted"
-      aria-label="Recently deleted"
+      title={t('nav.history')}
+      aria-label={t('nav.history')}
       onclick={() => toggleRoute('history')}
     >
       <Icon name="archive" size={16} />
@@ -90,8 +91,8 @@
     <button
       class="icon-btn nav-btn"
       class:active={route === 'settings'}
-      title="Settings"
-      aria-label="Settings"
+      title={t('nav.settings')}
+      aria-label={t('nav.settings')}
       onclick={() => toggleRoute('settings')}
     >
       <Icon name="settings" size={16} />

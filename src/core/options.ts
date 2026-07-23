@@ -2,6 +2,8 @@ export const BROWSER_ACTIONS = ['popup', 'store-selected', 'store-all', 'show-li
 export type BrowserAction = (typeof BROWSER_ACTIONS)[number]
 
 export interface Options {
+  /** UI language: 'auto' follows the browser; otherwise a locale code like 'es', 'zh-CN'. */
+  locale: string
   theme: 'auto' | 'light' | 'dark'
   /** Spacing scale for the list page. */
   density: 'compact' | 'comfortable'
@@ -17,8 +19,10 @@ export interface Options {
   focusOpenedTab: boolean
   itemDisplay: 'title-and-url' | 'title' | 'url'
   hideFavicon: boolean
-  /** Add stored tabs to browser history so they stay findable in the address bar. */
-  addHistory: boolean
+  /** Whether a list card's action buttons show always or only on hover (hover is invisible on touch). */
+  listActions: 'hover' | 'always'
+  /** Whether a stored tab's remove (×) button shows always or only on row hover. */
+  tabRemove: 'hover' | 'always'
   /** Don't store pinned browser tabs. */
   ignorePinned: boolean
   /** Pin lists created from a tab group. */
@@ -27,8 +31,6 @@ export interface Options {
   pageContext: boolean
   /** Show context menu on all elements (links, images, ...) not just the page. */
   allContext: boolean
-  /** Ask for confirmation before deleting a list (off by default — deletion has Undo and History). */
-  alertRemoveList: boolean
   /** How long deleted lists stay recoverable in History (locally). */
   trashRetention: 'immediately' | 'day' | 'week' | 'month'
   /** Skip about:/chrome:/file: etc. URLs when storing. */
@@ -46,6 +48,7 @@ export interface Options {
 }
 
 export const DEFAULT_OPTIONS: Options = {
+  locale: 'auto',
   theme: 'auto',
   density: 'compact',
   pinnedPosition: 'top',
@@ -55,12 +58,12 @@ export const DEFAULT_OPTIONS: Options = {
   focusOpenedTab: true,
   itemDisplay: 'title-and-url',
   hideFavicon: false,
-  addHistory: true,
+  listActions: 'hover',
+  tabRemove: 'hover',
   ignorePinned: false,
   pinGroupList: false,
   pageContext: true,
   allContext: false,
-  alertRemoveList: false,
   trashRetention: 'month',
   excludeIllegalURL: true,
   removeDuplicate: false,

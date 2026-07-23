@@ -1,0 +1,20 @@
+{
+  "appDesc": {
+    "message": "Store and restore your tabs in one click — a fast, private OneTab alternative with sync and a mobile viewer."
+  },
+  "cmdStoreSelected": {
+    "message": "Store selected tabs"
+  },
+  "cmdStoreAll": {
+    "message": "Store all tabs in this window"
+  },
+  "cmdStoreAllWindows": {
+    "message": "Store all tabs in all windows"
+  },
+  "cmdRestoreLatest": {
+    "message": "Restore the most recent list"
+  },
+  "cmdOpenLists": {
+    "message": "Open the tab list page"
+  }
+}

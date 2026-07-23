@@ -1,8 +1,13 @@
 <script lang="ts">
   import type { Options } from '../core/options'
+  import { registeredLocales, t } from '../i18n/i18n.svelte'
+  import { LOCALES } from '../i18n/locales'
   import { setOptions } from '../core/storage'
   import { app } from '../ui/state.svelte'
+  // optional feature — see src/feature-background/README.md
+  import BackgroundSection from '../feature-background/BackgroundSection.svelte'
   import ImportExport from './ImportExport.svelte'
+  import ShortcutsSection from './ShortcutsSection.svelte'
   import SyncSection from './SyncSection.svelte'
   import TabRow from './TabRow.svelte'
 
@@ -12,89 +17,106 @@
   ]
 
   const version = chrome.runtime.getManifest().version
+  const languages = LOCALES.filter(l => registeredLocales().includes(l.code))
 
   const update = <K extends keyof Options>(key: K, value: Options[K]) =>
     setOptions({ ...app.opts, [key]: value })
 
   interface ToggleDef {
     key: keyof Options
-    label: string
-    desc?: string
+    labelKey: string
+    descKey?: string
   }
 
   const storingToggles: ToggleDef[] = [
-    { key: 'ignorePinned', label: 'Skip pinned tabs', desc: 'Pinned browser tabs are left open when storing.' },
-    { key: 'excludeIllegalURL', label: 'Skip browser-internal pages', desc: 'about:, chrome:, file: and similar URLs are not stored.' },
-    { key: 'removeDuplicate', label: 'Remove duplicate tabs within a list' },
-    { key: 'addHistory', label: 'Keep stored tabs in browser history', desc: 'Stored tabs stay findable from the address bar.' },
-    { key: 'pinGroupList', label: 'Pin lists made from tab groups', desc: 'Pinned lists aren’t removed when opened.' },
+    { key: 'ignorePinned', labelKey: 'settings.storing.ignorePinned.label', descKey: 'settings.storing.ignorePinned.desc' },
+    { key: 'excludeIllegalURL', labelKey: 'settings.storing.excludeIllegalURL.label', descKey: 'settings.storing.excludeIllegalURL.desc' },
+    { key: 'removeDuplicate', labelKey: 'settings.storing.removeDuplicate.label' },
+    { key: 'pinGroupList', labelKey: 'settings.storing.pinGroupList.label', descKey: 'settings.storing.pinGroupList.desc' },
   ]
 
   const menuToggles: ToggleDef[] = [
     {
       key: 'pageContext',
-      label: 'Show in page right-click menu',
-      desc: 'Adds an “Even Better OneTab” submenu when right-clicking a webpage. Off, the actions only appear when right-clicking the toolbar icon.',
+      labelKey: 'settings.toolbar.pageContext.label',
+      descKey: 'settings.toolbar.pageContext.desc',
     },
     {
       key: 'allContext',
-      label: 'Show on links, images and selections too',
-      desc: 'Include the menu when right-clicking a link, image, video, or selected text — not just empty page area.',
+      labelKey: 'settings.toolbar.allContext.label',
+      descKey: 'settings.toolbar.allContext.desc',
     },
   ]
 </script>
 
 <div class="page">
-  <h1>Settings</h1>
+  <h1>{t('settings.title')}</h1>
 
   <section>
-    <h2>Appearance</h2>
+    <h2>{t('settings.appearance.heading')}</h2>
     <div class="card">
       <div class="row">
         <div class="text">
-          <div class="label">Theme</div>
+          <div class="label">{t('settings.language.label')}</div>
         </div>
-        <select class="select" value={app.opts.theme} onchange={e => update('theme', e.currentTarget.value as Options['theme'])}>
-          <option value="auto">System</option>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
+        <select
+          class="select lang-select"
+          aria-label={t('settings.language.label')}
+          value={app.opts.locale}
+          onchange={e => update('locale', e.currentTarget.value)}
+        >
+          <option value="auto">{t('settings.language.auto')}</option>
+          {#each languages as loc (loc.code)}
+            <option value={loc.code}>{loc.label}</option>
+          {/each}
         </select>
       </div>
       <div class="row">
         <div class="text">
-          <div class="label">List layout</div>
+          <div class="label">{t('settings.appearance.theme.label')}</div>
         </div>
-        <select class="select" value={app.opts.density} onchange={e => update('density', e.currentTarget.value as Options['density'])}>
-          <option value="compact">Compact</option>
-          <option value="comfortable">Comfortable</option>
+        <select class="select" aria-label={t('settings.appearance.theme.label')} value={app.opts.theme} onchange={e => update('theme', e.currentTarget.value as Options['theme'])}>
+          <option value="auto">{t('settings.appearance.theme.auto')}</option>
+          <option value="light">{t('settings.appearance.theme.light')}</option>
+          <option value="dark">{t('settings.appearance.theme.dark')}</option>
         </select>
       </div>
       <div class="row">
         <div class="text">
-          <div class="label">Pinned lists</div>
+          <div class="label">{t('settings.appearance.density.label')}</div>
+        </div>
+        <select class="select" aria-label={t('settings.appearance.density.label')} value={app.opts.density} onchange={e => update('density', e.currentTarget.value as Options['density'])}>
+          <option value="compact">{t('settings.appearance.density.compact')}</option>
+          <option value="comfortable">{t('settings.appearance.density.comfortable')}</option>
+        </select>
+      </div>
+      <div class="row">
+        <div class="text">
+          <div class="label">{t('settings.appearance.pinnedPosition.label')}</div>
         </div>
         <select
           class="select"
+          aria-label={t('settings.appearance.pinnedPosition.label')}
           value={app.opts.pinnedPosition}
           onchange={e => update('pinnedPosition', e.currentTarget.value as Options['pinnedPosition'])}
         >
-          <option value="top">At the top</option>
-          <option value="bottom">At the bottom</option>
+          <option value="top">{t('settings.appearance.pinnedPosition.top')}</option>
+          <option value="bottom">{t('settings.appearance.pinnedPosition.bottom')}</option>
         </select>
       </div>
       <div class="row">
         <div class="text">
-          <div class="label">Tab display</div>
+          <div class="label">{t('settings.appearance.tabDisplay.label')}</div>
         </div>
-        <select class="select" value={app.opts.itemDisplay} onchange={e => update('itemDisplay', e.currentTarget.value as Options['itemDisplay'])}>
-          <option value="title-and-url">Title and domain</option>
-          <option value="title">Title only</option>
-          <option value="url">URL only</option>
+        <select class="select" aria-label={t('settings.appearance.tabDisplay.label')} value={app.opts.itemDisplay} onchange={e => update('itemDisplay', e.currentTarget.value as Options['itemDisplay'])}>
+          <option value="title-and-url">{t('settings.appearance.tabDisplay.titleAndUrl')}</option>
+          <option value="title">{t('settings.appearance.tabDisplay.title')}</option>
+          <option value="url">{t('settings.appearance.tabDisplay.url')}</option>
         </select>
       </div>
       <label class="row">
         <div class="text">
-          <div class="label">Hide favicons</div>
+          <div class="label">{t('settings.appearance.hideFavicon.label')}</div>
         </div>
         <input
           type="checkbox"
@@ -103,7 +125,38 @@
           onchange={e => update('hideFavicon', e.currentTarget.checked)}
         />
       </label>
-      <div class="demo" aria-hidden="true">
+      <div class="row">
+        <div class="text">
+          <div class="label">{t('settings.appearance.listActions.label')}</div>
+          <div class="desc">{t('settings.appearance.listActions.desc')}</div>
+        </div>
+        <select
+          class="select"
+          aria-label={t('settings.appearance.listActions.label')}
+          value={app.opts.listActions}
+          onchange={e => update('listActions', e.currentTarget.value as Options['listActions'])}
+        >
+          <option value="hover">{t('settings.appearance.showOnHover')}</option>
+          <option value="always">{t('settings.appearance.alwaysShow')}</option>
+        </select>
+      </div>
+      <div class="row">
+        <div class="text">
+          <div class="label">{t('settings.appearance.tabRemove.label')}</div>
+          <div class="desc">{t('settings.appearance.tabRemove.desc')}</div>
+        </div>
+        <select
+          class="select"
+          aria-label={t('settings.appearance.tabRemove.label')}
+          value={app.opts.tabRemove}
+          onchange={e => update('tabRemove', e.currentTarget.value as Options['tabRemove'])}
+        >
+          <option value="hover">{t('settings.appearance.showOnHover')}</option>
+          <option value="always">{t('settings.appearance.alwaysShow')}</option>
+        </select>
+      </div>
+      <!-- inert keeps the decorative demo rows out of the tab order and off assistive tech -->
+      <div class="demo" inert aria-hidden="true">
         {#each demoTabs as tab (tab.url)}
           <TabRow {tab} display={app.opts.itemDisplay} hideFavicon={app.opts.hideFavicon} onOpen={() => {}} onRemove={() => {}} />
         {/each}
@@ -111,35 +164,38 @@
     </div>
   </section>
 
+  <BackgroundSection />
+
   <section>
-    <h2>Storing tabs</h2>
+    <h2>{t('settings.storing.heading')}</h2>
     <div class="card">
       <div class="row">
         <div class="text">
-          <div class="label">Storing opens the list page</div>
+          <div class="label">{t('settings.storing.openListPage.label')}</div>
         </div>
         <select
           class="select"
+          aria-label={t('settings.storing.openListPage.label')}
           value={app.opts.openListPage}
           onchange={e => update('openListPage', e.currentTarget.value as Options['openListPage'])}
         >
-          <option value="all-stored">When all tabs are stored</option>
-          <option value="always">When any tabs are stored</option>
-          <option value="if-absent">If not open in current window</option>
-          <option value="never">Never</option>
+          <option value="all-stored">{t('settings.storing.openListPage.allStored')}</option>
+          <option value="always">{t('settings.storing.openListPage.always')}</option>
+          <option value="if-absent">{t('settings.storing.openListPage.ifAbsent')}</option>
+          <option value="never">{t('settings.storing.openListPage.never')}</option>
         </select>
       </div>
-      {#each storingToggles as t (t.key)}
+      {#each storingToggles as toggle (toggle.key)}
         <label class="row">
           <div class="text">
-            <div class="label">{t.label}</div>
-            {#if t.desc}<div class="desc">{t.desc}</div>{/if}
+            <div class="label">{t(toggle.labelKey)}</div>
+            {#if toggle.descKey}<div class="desc">{t(toggle.descKey)}</div>{/if}
           </div>
           <input
             type="checkbox"
             class="switch"
-            checked={app.opts[t.key] as boolean}
-            onchange={e => update(t.key, e.currentTarget.checked as never)}
+            checked={app.opts[toggle.key] as boolean}
+            onchange={e => update(toggle.key, e.currentTarget.checked as never)}
           />
         </label>
       {/each}
@@ -147,40 +203,42 @@
   </section>
 
   <section>
-    <h2>Opening tabs</h2>
+    <h2>{t('settings.opening.heading')}</h2>
     <div class="card">
       <div class="row">
         <div class="text">
-          <div class="label">Clicking a stored tab</div>
-          <div class="desc">Hold ⌘ (or Ctrl) while clicking to keep the tab either way.</div>
+          <div class="label">{t('settings.opening.itemClick.label')}</div>
+          <div class="desc">{t('settings.opening.itemClick.desc')}</div>
         </div>
         <select
           class="select"
+          aria-label={t('settings.opening.itemClick.label')}
           value={app.opts.itemClickAction}
           onchange={e => update('itemClickAction', e.currentTarget.value as Options['itemClickAction'])}
         >
-          <option value="open-and-remove">Opens it and removes it from the list</option>
-          <option value="open">Opens it and keeps it in the list</option>
+          <option value="open-and-remove">{t('settings.opening.itemClick.openAndRemove')}</option>
+          <option value="open">{t('settings.opening.itemClick.open')}</option>
         </select>
       </div>
       <div class="row">
         <div class="text">
-          <div class="label">Opening a list</div>
-          <div class="desc">Pinned lists aren’t removed when opened.</div>
+          <div class="label">{t('settings.opening.openList.label')}</div>
+          <div class="desc">{t('settings.opening.openList.desc')}</div>
         </div>
         <select
           class="select"
+          aria-label={t('settings.opening.openList.label')}
           value={app.opts.openListAction}
           onchange={e => update('openListAction', e.currentTarget.value as Options['openListAction'])}
         >
-          <option value="open-and-remove">Opens it and removes the list</option>
-          <option value="open">Opens it and keeps the list</option>
+          <option value="open-and-remove">{t('settings.opening.openList.openAndRemove')}</option>
+          <option value="open">{t('settings.opening.openList.open')}</option>
         </select>
       </div>
       <label class="row">
         <div class="text">
-          <div class="label">Switch to the opened tab</div>
-          <div class="desc">Off, clicked tabs open in the background and you stay on this page.</div>
+          <div class="label">{t('settings.opening.focusOpenedTab.label')}</div>
+          <div class="desc">{t('settings.opening.focusOpenedTab.desc')}</div>
         </div>
         <input
           type="checkbox"
@@ -191,113 +249,105 @@
       </label>
       <div class="row">
         <div class="text">
-          <div class="label">Open tabs in</div>
+          <div class="label">{t('settings.opening.restorePosition.label')}</div>
         </div>
         <select
           class="select"
+          aria-label={t('settings.opening.restorePosition.label')}
           value={app.opts.restorePosition}
           onchange={e => update('restorePosition', e.currentTarget.value as Options['restorePosition'])}
         >
-          <option value="end">The end of the current window</option>
-          <option value="start">The start of the current window</option>
-          <option value="new-window">A new window</option>
+          <option value="end">{t('settings.opening.restorePosition.end')}</option>
+          <option value="start">{t('settings.opening.restorePosition.start')}</option>
+          <option value="new-window">{t('settings.opening.restorePosition.newWindow')}</option>
         </select>
       </div>
-      <label class="row">
-        <div class="text">
-          <div class="label">Confirm before deleting a list</div>
-          <div class="desc">Deletions can be undone, and stay recoverable in History.</div>
-        </div>
-        <input
-          type="checkbox"
-          class="switch"
-          checked={app.opts.alertRemoveList}
-          onchange={e => update('alertRemoveList', e.currentTarget.checked)}
-        />
-      </label>
       <div class="row">
         <div class="text">
-          <div class="label">Deleted lists are</div>
-          <div class="desc">Kept lists can be recovered from the History page (on this device only).</div>
+          <div class="label">{t('settings.opening.trashRetention.label')}</div>
+          <div class="desc">{t('settings.opening.trashRetention.desc')}</div>
         </div>
         <select
           class="select"
+          aria-label={t('settings.opening.trashRetention.label')}
           value={app.opts.trashRetention}
           onchange={e => update('trashRetention', e.currentTarget.value as Options['trashRetention'])}
         >
-          <option value="immediately">Removed immediately</option>
-          <option value="day">Kept for 1 day</option>
-          <option value="week">Kept for 1 week</option>
-          <option value="month">Kept for 1 month</option>
+          <option value="immediately">{t('settings.opening.trashRetention.immediately')}</option>
+          <option value="day">{t('settings.opening.trashRetention.day')}</option>
+          <option value="week">{t('settings.opening.trashRetention.week')}</option>
+          <option value="month">{t('settings.opening.trashRetention.month')}</option>
         </select>
       </div>
     </div>
   </section>
 
   <section>
-    <h2>Toolbar &amp; menus</h2>
+    <h2>{t('settings.toolbar.heading')}</h2>
     <div class="card">
       <div class="row">
         <div class="text">
-          <div class="label">Clicking the toolbar button</div>
+          <div class="label">{t('settings.toolbar.browserAction.label')}</div>
           <div class="desc">
             {#if app.opts.browserAction !== 'popup'}
-              Without the popup, recent lists are reachable from the list page and right-click menu.
+              {t('settings.toolbar.browserAction.descNonPopup')}
             {:else}
-              The popup has store buttons and your recent lists.
+              {t('settings.toolbar.browserAction.descPopup')}
             {/if}
           </div>
         </div>
         <select
           class="select"
+          aria-label={t('settings.toolbar.browserAction.label')}
           value={app.opts.browserAction}
           onchange={e => update('browserAction', e.currentTarget.value as Options['browserAction'])}
         >
-          <option value="popup">Opens the popup</option>
-          <option value="store-selected">Stores selected tabs</option>
-          <option value="store-all">Stores all tabs</option>
-          <option value="show-list">Opens the list page</option>
+          <option value="popup">{t('settings.toolbar.browserAction.popup')}</option>
+          <option value="store-selected">{t('settings.toolbar.browserAction.storeSelected')}</option>
+          <option value="store-all">{t('settings.toolbar.browserAction.storeAll')}</option>
+          <option value="show-list">{t('settings.toolbar.browserAction.showList')}</option>
         </select>
       </div>
-      {#each menuToggles as t (t.key)}
+      {#each menuToggles as toggle (toggle.key)}
         <label class="row">
           <div class="text">
-            <div class="label">{t.label}</div>
-            {#if t.desc}<div class="desc">{t.desc}</div>{/if}
+            <div class="label">{t(toggle.labelKey)}</div>
+            {#if toggle.descKey}<div class="desc">{t(toggle.descKey)}</div>{/if}
           </div>
           <input
             type="checkbox"
             class="switch"
-            checked={app.opts[t.key] as boolean}
-            disabled={t.key === 'allContext' && !app.opts.pageContext}
-            onchange={e => update(t.key, e.currentTarget.checked as never)}
+            checked={app.opts[toggle.key] as boolean}
+            disabled={toggle.key === 'allContext' && !app.opts.pageContext}
+            onchange={e => update(toggle.key, e.currentTarget.checked as never)}
           />
         </label>
       {/each}
-      <div class="hint">
-        Keyboard shortcuts can be configured at
-        <code>brave://extensions/shortcuts</code> (or <code>chrome://extensions/shortcuts</code>).
-      </div>
     </div>
   </section>
 
+  <ShortcutsSection />
   <SyncSection />
   <ImportExport />
 
   <p class="support">
-    Made with ❤️ in NYC<br />
+    {t('settings.footer.madeWith')}<br />
     <a class="btn primary coffee" href="https://github.com/sponsors/bphirsh" target="_blank" rel="noreferrer">
-      ☕ Buy me a coffee
+      {t('settings.footer.coffee')}
     </a>
   </p>
-  <p class="version">Even Better OneTab v{version}</p>
+  <p class="version">
+    {t('settings.footer.version', { version })}
+    <span class="sep">·</span>
+    <a href="https://bphirsh.github.io/even-better-onetab/privacy/" target="_blank" rel="noreferrer">{t('settings.footer.privacy')}</a>
+  </p>
 </div>
 
 <style>
   .page {
     max-width: 640px;
     margin: 0 auto;
-    padding: 24px 24px 80px;
+    padding: 24px 24px 17px;
   }
 
   h1 {
@@ -348,16 +398,17 @@
     font-weight: 500;
   }
 
+  /* Fixed size so the control doesn't jump when the language (and thus the
+     "Auto…" option's length) changes. It's a flex item, so a plain width is
+     ignored — pin the flex-basis and forbid grow/shrink. */
+  .lang-select {
+    flex: 0 0 210px;
+  }
+
   .desc {
     font-size: 12.5px;
     color: var(--text-2);
     margin-top: 2px;
-  }
-
-  .hint {
-    padding: 12px 0;
-    font-size: 12.5px;
-    color: var(--text-2);
   }
 
   .demo {
@@ -385,7 +436,22 @@
     text-align: center;
     font-size: 11.5px;
     color: var(--text-3);
-    margin: 16px 0 0;
+    /* large gap so the version sits low on the page, level with the corner
+       sync/counts pill once Settings is fully scrolled */
+    margin: 48px 0 0;
+  }
+
+  .version .sep {
+    opacity: 0.5;
+    margin: 0 4px;
+  }
+
+  .version a {
+    color: var(--text-3);
+  }
+
+  .version a:hover {
+    color: var(--text-2);
   }
 
   .coffee {
@@ -395,13 +461,6 @@
 
   .coffee:hover {
     text-decoration: none;
-  }
-
-  code {
-    background: var(--surface-2);
-    padding: 1px 5px;
-    border-radius: 4px;
-    font-size: 12px;
   }
 
   /* switch */

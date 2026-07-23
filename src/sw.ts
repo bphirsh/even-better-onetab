@@ -51,6 +51,11 @@ chrome.runtime.onInstalled.addListener(details => {
   if (details.reason === 'install' || details.reason === 'update') {
     migrateFromV1().then(rebuildMenus).then(applyBrowserAction)
   }
+  // First run: open the list page (pinned, so it stays as a home base) — its
+  // empty state explains how to store the first tabs.
+  if (details.reason === 'install') {
+    chrome.tabs.create({ url: chrome.runtime.getURL('app.html'), pinned: true }).catch(() => {})
+  }
 })
 
 chrome.runtime.onStartup.addListener(() => {

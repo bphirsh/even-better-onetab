@@ -1,6 +1,7 @@
 <script lang="ts">
   import { flip } from 'svelte/animate'
   import { dndzone, type DndEvent } from 'svelte-dnd-action'
+  import { t } from '../i18n/i18n.svelte'
   import type { TabList } from '../core/types'
   import Icon from '../ui/Icon.svelte'
   import { app } from '../ui/state.svelte'
@@ -58,12 +59,17 @@
   {#if app.loaded && app.lists.length === 0}
     <div class="empty">
       <Icon name="layers" size={40} />
-      <h2>No stored tabs yet</h2>
-      <p>Store tabs with the extension button, the page’s right-click menu, or a keyboard shortcut — they’ll show up here.</p>
+      <h2>{t('lists.empty.title')}</h2>
+      <p>{t('lists.empty.lead')}</p>
+      <ul class="ways">
+        <li><span class="k">{t('lists.empty.toolbarLabel')}</span> {t('lists.empty.toolbar')}</li>
+        <li><span class="k">{t('lists.empty.rightClickLabel')}</span> {t('lists.empty.rightClick')}</li>
+        <li><span class="k">{t('lists.empty.keyboardLabel')}</span> {t('lists.empty.keyboard')}</li>
+      </ul>
     </div>
   {:else if app.loaded && dndItems.length === 0}
     <div class="empty">
-      <p>Nothing matches your filter.</p>
+      <p>{t('lists.noMatch')}</p>
     </div>
   {:else}
     <div
@@ -125,5 +131,35 @@
   .empty p {
     margin: 0;
     max-width: 360px;
+  }
+
+  .ways {
+    list-style: none;
+    margin: 14px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
+    max-width: 380px;
+  }
+
+  .ways li {
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.5;
+  }
+
+  .ways .k {
+    display: inline-block;
+    min-width: 74px;
+    margin-right: 8px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
   }
 </style>

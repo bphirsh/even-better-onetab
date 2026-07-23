@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="_base.css" />
+<style>
+  .stage { flex-direction: column; }
+  .head { max-width: 900px; margin-top: 8px; }
+  .head h1 { margin-bottom: 14px; }
+  .head .sub { max-width: 680px; }
+  .flow { flex: 1; display: flex; align-items: center; justify-content: center; gap: 0; margin-top: 4px; position: relative; }
+
+  /* laptop */
+  .laptop { width: 560px; }
+  .screen { background: var(--surface); border: 1px solid var(--border); border-radius: 14px 14px 4px 4px; box-shadow: var(--shadow-lg); overflow: hidden; }
+  .screen .top { height: 34px; background: var(--surface-2); display: flex; align-items: center; gap: 6px; padding: 0 14px; }
+  .screen .top i { width: 9px; height: 9px; border-radius: 50%; background: #c7cdd6; }
+  .base { height: 12px; margin: 0 auto; width: 620px; background: linear-gradient(#d4d9e0,#c2c8d1); border-radius: 0 0 12px 12px; }
+  .mini { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .mcard { border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 10px; padding: 10px 12px; }
+  .mcard.teal { border-left-color: var(--teal); }
+  .mcard .h { font-size: 13.5px; font-weight: 700; }
+  .mcard .m { font-size: 11px; color: var(--text-3); margin-left: 6px; font-weight: 500; }
+  .mrow { display: flex; align-items: center; gap: 8px; margin-top: 7px; }
+  .mrow i { width: 12px; height: 12px; border-radius: 3px; }
+  .mrow span { font-size: 12px; color: var(--text-2); }
+
+  /* sync link */
+  .link { width: 150px; display: flex; flex-direction: column; align-items: center; gap: 10px; z-index: 2; }
+  .gist { display: flex; flex-direction: column; align-items: center; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; box-shadow: var(--shadow); }
+  .gist .gh { font-size: 22px; }
+  .gist .gt { font-size: 12.5px; font-weight: 700; }
+  .gist .gs { font-size: 10.5px; color: var(--text-3); }
+  .dashes { color: var(--accent); font-size: 20px; letter-spacing: 2px; }
+
+  /* phone */
+  .phone { width: 210px; height: 420px; background: #11151c; border-radius: 34px; padding: 10px; box-shadow: var(--shadow-lg); }
+  .pscreen { width: 100%; height: 100%; background: var(--bg); border-radius: 25px; overflow: hidden; position: relative; }
+  .pnotch { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 70px; height: 18px; background: #11151c; border-radius: 10px; }
+  .ptop { padding: 26px 14px 10px; font-size: 13px; font-weight: 800; }
+  .ptop small { display: block; font-size: 9.5px; font-weight: 600; color: var(--text-3); letter-spacing: .04em; }
+  .pcard { margin: 6px 12px; background: var(--surface); border-radius: 10px; border-left: 3px solid var(--accent); padding: 8px 10px; box-shadow: var(--shadow); }
+  .pcard.teal { border-left-color: var(--teal); }
+  .pcard .ph { font-size: 11.5px; font-weight: 700; }
+  .pcard .pr { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
+  .pcard .pr i { width: 9px; height: 9px; border-radius: 2px; }
+  .pcard .pr span { font-size: 10px; color: var(--text-2); }
+
+  .badges { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; }
+  .badge { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); font-size: 14px; font-weight: 600; color: var(--text-2); }
+  .badge b { color: var(--text); }
+  .check { color: var(--teal); font-weight: 800; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <img class="wordmark" src="../../../public/icons/wordmark-transparent.png" alt="" />
+  <div class="head">
+    <h1>Sync without an account.</h1>
+    <div class="sub">No sign-up, no server of ours. Your lists live in a private GitHub gist that <span class="accent">you</span> own — and you can open them on your phone.</div>
+  </div>
+  <div class="flow">
+    <div class="laptop">
+      <div class="screen">
+        <div class="top"><i></i><i></i><i></i></div>
+        <div class="mini">
+          <div class="mcard"><span class="h">Reading list</span><span class="m">6 tabs</span>
+            <div class="mrow"><i style="background:#111"></i><span>The 4 Best Standing Desks of 2026</span></div>
+            <div class="mrow"><i style="background:#3a6ea5"></i><span>Standing desk — Wikipedia</span></div>
+          </div>
+          <div class="mcard teal"><span class="h">Research</span><span class="m">3 tabs · pinned</span>
+            <div class="mrow"><i style="background:#ff4500"></i><span>Ergonomic desk setups</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="base"></div>
+    </div>
+
+    <div class="link">
+      <div class="dashes">┈┈┈</div>
+      <div class="gist">
+        <div class="gh">🔒</div>
+        <div class="gt">your gist</div>
+        <div class="gs">github.com</div>
+      </div>
+      <div class="dashes">┈┈┈</div>
+    </div>
+
+    <div class="phone">
+      <div class="pscreen">
+        <div class="pnotch"></div>
+        <div class="ptop">Even Better OneTab<small>MOBILE VIEWER</small></div>
+        <div class="pcard"><div class="ph">Reading list</div>
+          <div class="pr"><i style="background:#111"></i><span>Best Standing Desks</span></div>
+          <div class="pr"><i style="background:#3a6ea5"></i><span>Standing desk — Wiki</span></div>
+        </div>
+        <div class="pcard teal"><div class="ph">Research</div>
+          <div class="pr"><i style="background:#ff4500"></i><span>Ergonomic setups</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="badges">
+    <span class="badge"><span class="check">✓</span> No sign-up</span>
+    <span class="badge"><span class="check">✓</span> No server of ours</span>
+    <span class="badge"><span class="check">✓</span> <b>You own the data</b></span>
+  </div>
+</div>
+</body>
+</html>

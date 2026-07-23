@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="_base.css" />
+<style>
+  .stage { align-items: center; gap: 40px; }
+  .left { width: 500px; flex: none; }
+  .left h1 { margin-bottom: 22px; }
+  .left .sub { margin-bottom: 30px; max-width: 440px; }
+  .right { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+
+  /* cramped browser window */
+  .win { width: 560px; border-radius: 14px; background: #e4e7ec; box-shadow: var(--shadow); overflow: hidden; }
+  .winbar { display: flex; align-items: center; gap: 6px; padding: 9px 12px; background: #dde1e7; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .tabs { display: flex; gap: 2px; padding: 6px 6px 0; background: #dde1e7; overflow: hidden; }
+  .tab { flex: 1; min-width: 0; height: 26px; border-radius: 7px 7px 0 0; background: #eef1f5; display: flex; align-items: center; justify-content: center; }
+  .tab.on { background: #fff; }
+  .tab i { width: 9px; height: 9px; border-radius: 2px; display: block; }
+  .winbody { height: 12px; background: #fff; }
+  .count { position: absolute; top: -14px; right: -10px; background: #e5484d; color: #fff; font-size: 13px; font-weight: 700; padding: 5px 12px; border-radius: 999px; box-shadow: var(--shadow); }
+  .winwrap { position: relative; }
+
+  .arrow { display: flex; align-items: center; gap: 10px; color: var(--accent); font-weight: 700; font-size: 15px; }
+  .arrow svg { display: block; }
+
+  .card { width: 560px; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <img class="wordmark" src="../../../public/icons/wordmark-transparent.png" alt="" />
+  <div class="left">
+    <h1>Get your<br />browser back.</h1>
+    <div class="sub">Collapse a wall of open tabs into one clean list — in a single click, with nothing lost.</div>
+    <span class="pill">⌘ One click to store them all</span>
+  </div>
+  <div class="right">
+    <div class="winwrap">
+      <div class="count">47 tabs</div>
+      <div class="win">
+        <div class="winbar">
+          <span class="dot" style="background:#ff5f57"></span>
+          <span class="dot" style="background:#febc2e"></span>
+          <span class="dot" style="background:#28c840"></span>
+        </div>
+        <div class="tabs" id="tabs"></div>
+        <div class="winbody"></div>
+      </div>
+    </div>
+    <div class="arrow">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="6 13 12 19 18 13"/></svg>
+      stored in Even Better OneTab
+    </div>
+    <div class="card bar raised">
+      <div class="list-head">
+        <span class="list-title">Reading list</span>
+        <span class="list-meta">47 tabs · just now</span>
+        <span class="chev">▾</span>
+      </div>
+      <div style="padding:0 18px 6px"><span class="tag">research</span></div>
+      <div class="row"><span class="fav" style="background:#111"></span><span class="t">The 4 Best Standing Desks of 2026 <span class="d">wirecutter.com</span></span></div>
+      <div class="row"><span class="fav" style="background:#3a6ea5"></span><span class="t">Standing desk — Wikipedia <span class="d">en.wikipedia.org</span></span></div>
+      <div class="row"><span class="fav" style="background:#ff4500"></span><span class="t">Best sit-stand routine, per ergonomists <span class="d">reddit.com</span></span></div>
+      <div class="row" style="padding-bottom:16px"><span class="fav" style="background:#1db954"></span><span class="t">Focus playlist for deep work <span class="d">open.spotify.com</span></span></div>
+    </div>
+  </div>
+</div>
+<script>
+  const colors = ['#111','#3a6ea5','#ff4500','#1db954','#e5484d','#4c6ef5','#febc2e','#16a394','#8b5cf6','#ec4899','#0ea5e9','#f97316','#111','#3a6ea5','#1db954','#4c6ef5'];
+  const t = document.getElementById('tabs');
+  colors.forEach((c,idx) => { const d=document.createElement('div'); d.className='tab'+(idx===2?' on':''); d.innerHTML='<i style="background:'+c+'"></i>'; t.appendChild(d); });
+</script>
+</body>
+</html>
